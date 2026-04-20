@@ -410,3 +410,48 @@ select:focus, input:focus {
   background: var(--border);
 }
 
+/* ── FOOTER ──────────────────────────────────────────────────────────────── */
+
+.footer {
+  background: var(--bg-dark);
+  border-top: 1px solid var(--border);
+  padding: 2rem 0;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+/* ── PAGE HEADER ─────────────────────────────────────────────────────────── */
+
+.page-header {
+  background: var(--bg-dark);
+  padding: 8rem 0 3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.page-header h1 {
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+/* ── RECOMMEND SECTION ───────────────────────────────────────────────────── */
+
+.recommend-section {
+  background: #0d1220;
+  min-height: 70vh;
+  padding: 3rem 0;
+}
+
+.recommend-form {
+  max-width: 750px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
