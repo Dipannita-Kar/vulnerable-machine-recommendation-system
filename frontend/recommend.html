@@ -67,15 +67,14 @@
               <label class="form-label">
                 Attack Category <span class="required">*</span>
               </label>
-              <select id="attack_category">
-                <option value="">Select category</option>
-                <option value="Web Exploitation">Web Exploitation</option>
-                <option value="Network Exploitation">Network Exploitation</option>
-                <option value="Binary Exploitation">Binary Exploitation</option>
-                <option value="Cryptographic Exploitation">Cryptographic Exploitation</option>
-                <option value="Mixed (Web + Network)">Mixed (Web + Network)</option>
-                <option value="Credential-Based Exploitation">Credential-Based Exploitation</option>
-              </select>
+              <div class="checkbox-grid" id="attack_category">
+                <label class="checkbox-item"><input type="checkbox" value="Web Exploitation"/> Web Exploitation</label>
+                <label class="checkbox-item"><input type="checkbox" value="Network Exploitation"/> Network Exploitation</label>
+                <label class="checkbox-item"><input type="checkbox" value="Binary Exploitation"/> Binary Exploitation</label>
+                <label class="checkbox-item"><input type="checkbox" value="Cryptographic Exploitation"/> Cryptographic Exploitation</label>
+                <label class="checkbox-item"><input type="checkbox" value="Mixed (Web + Network)"/> Mixed (Web + Network)</label>
+                <label class="checkbox-item"><input type="checkbox" value="Credential-Based Exploitation"/> Credential-Based Exploitation</label>
+              </div>
             </div>
 
           </div>
@@ -94,20 +93,19 @@
               <label class="form-label">
                 Vulnerability Type <span class="optional">(optional)</span>
               </label>
-              <select id="vuln_type">
-                <option value="">Any vulnerability</option>
-                <option value="SQL Injection">SQL Injection</option>
-                <option value="File Upload">File Upload</option>
-                <option value="Local File Inclusion (LFI)">Local File Inclusion (LFI)</option>
-                <option value="Remote Code Execution">Remote Code Execution</option>
-                <option value="Command Injection">Command Injection</option>
-                <option value="Blind SQL Injection">Blind SQL Injection</option>
-                <option value="Insecure Deserialization">Insecure Deserialization</option>
-                <option value="WordPress Exploitation">WordPress Exploitation</option>
-                <option value="Buffer Overflow">Buffer Overflow</option>
-                <option value="SMB Enumeration">SMB Enumeration</option>
-                <option value="Weak Credentials">Weak Credentials</option>
-              </select>
+              <div class="checkbox-grid" id="vuln_type">
+                <label class="checkbox-item"><input type="checkbox" value="SQL Injection"/> SQL Injection</label>
+                <label class="checkbox-item"><input type="checkbox" value="File Upload"/> File Upload</label>
+                <label class="checkbox-item"><input type="checkbox" value="Local File Inclusion (LFI)"/> Local File Inclusion (LFI)</label>
+                <label class="checkbox-item"><input type="checkbox" value="Remote Code Execution"/> Remote Code Execution</label>
+                <label class="checkbox-item"><input type="checkbox" value="Command Injection"/> Command Injection</label>
+                <label class="checkbox-item"><input type="checkbox" value="Blind SQL Injection"/> Blind SQL Injection</label>
+                <label class="checkbox-item"><input type="checkbox" value="Insecure Deserialization"/> Insecure Deserialization</label>
+                <label class="checkbox-item"><input type="checkbox" value="WordPress Exploitation"/> WordPress Exploitation</label>
+                <label class="checkbox-item"><input type="checkbox" value="Buffer Overflow"/> Buffer Overflow</label>
+                <label class="checkbox-item"><input type="checkbox" value="SMB Enumeration"/> SMB Enumeration</label>
+                <label class="checkbox-item"><input type="checkbox" value="Weak Credentials"/> Weak Credentials</label>
+              </div>
             </div>
 
             <div class="form-group">

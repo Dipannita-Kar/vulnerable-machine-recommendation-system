@@ -593,3 +593,31 @@ input[type="number"]:focus {
   box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
   background: rgba(0,212,255,0.05);
 }
+
+/* ── CHECKBOX TICK ───────────────────────────────────────────────────────── */
+
+.checkbox-item input[type="checkbox"] {
+  display: none;
+}
+
+.checkbox-item::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--text-secondary);
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.checkbox-item:has(input:checked)::before {
+  content: '✓';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0a0e17;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
