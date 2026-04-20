@@ -6,6 +6,13 @@ import pandas as pd
 # All other files import from here
 
 
+
+
+
+# Note: knn_model.pkl is not loaded here
+# The recommender uses masked cosine similarity instead
+# This performs better for sparse student vectors
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(BASE_DIR, 'saved_models')
 DATA_DIR = os.path.join(BASE_DIR, 'data')
