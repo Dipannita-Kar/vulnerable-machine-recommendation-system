@@ -14,7 +14,7 @@ df            = load_dataset()
 expansion_map = build_expansion_map(df)
 print("CyberPath API ready")
 
-#  ROUTES
+# ── ROUTES ────
 
 @app.route('/')
 def home():
@@ -52,19 +52,23 @@ def get_recommendations():
     except (TypeError, ValueError):
         return jsonify({'error': 'n_recommendations must be an integer'}), 400
 
-    results, fallback_msg, match_mode, reason, confidence, confidence_msg = recommend(
-        models          = models,
-        expansion_map   = expansion_map,
-        difficulty      = difficulty,
-        attack_category = attack_category,
-        os_pref         = os_pref,
-        vuln_type       = vuln_type,
-        learning_objectives = learning_objectives,
-        skills          = skills,
-        entry_point     = entry_point,
-        platform        = platform,
-        n_recommendations = n_recommendations
-    )
+    # Run recommendation engine
+    try:
+        results, fallback_msg, match_mode, reason, confidence, confidence_msg = recommend(
+            models          = models,
+            expansion_map   = expansion_map,
+            difficulty      = difficulty,
+            attack_category = attack_category,
+            os_pref         = os_pref,
+            vuln_type       = vuln_type,
+            learning_objectives = learning_objectives,
+            skills          = skills,
+            entry_point     = entry_point,
+            platform        = platform,
+            n_recommendations = n_recommendations
+        )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
     return jsonify({
         'results':        results,
