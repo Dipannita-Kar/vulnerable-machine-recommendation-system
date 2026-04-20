@@ -14,7 +14,7 @@ df            = load_dataset()
 expansion_map = build_expansion_map(df)
 print("CyberPath API ready")
 
-# ── ROUTES ─────
+#  ROUTES
 
 @app.route('/')
 def home():
