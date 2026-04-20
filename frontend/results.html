@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Results — CyberPath</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="index.html" class="nav-logo">Cyber<span>Path</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recommend.html">Recommend</a></li>
+    </ul>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="container">
+      <h1>Your Recommendations</h1>
+      <p class="text-muted">Based on your preferences, here are the best matching machines</p>
+    </div>
+  </section>
+
+  <!-- RESULTS SECTION -->
+  <section class="results-section">
+    <div class="container">
+
+      <!-- SUMMARY BAR -->
+      <div class="summary-bar" id="summaryBar"></div>
+
+      <!-- RESULTS GRID -->
+      <div class="results-grid" id="resultsGrid"></div>
+
+      <!-- BACK BUTTON -->
+      <div style="text-align:center; margin-top:3rem;">
+        <a href="recommend.html" class="btn btn-outline">
+          ← Back to Search
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <span class="nav-logo">Cyber<span>Path</span></span>
+        <p class="text-muted">AI-Powered Vulnerable Machine Recommender</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script>
+    // Load and display results from sessionStorage
+    const raw = sessionStorage.getItem('cyberpath_results');
+    const inputRaw = sessionStorage.getItem('cyberpath_input');
+
+    if (!raw) {
+      window.location.href = 'recommend.html';
+    }
+
+    const data  = JSON.parse(raw);
+    const input = JSON.parse(inputRaw);
+
+    // ── SUMMARY BAR ──────────────────────────────────────────────────────────
+    const modeColors = {
+      'Exact Match':      'match-exact',
+      'Category Match':   'match-category',
+      'Difficulty Match': 'match-difficulty',
+      'Broad Match':      'match-broad',
+      'No Match':         'match-none'
+    };
+
+    const modeEmoji = {
+      'Exact Match':      '✅',
+      'Category Match':   '🔵',
+      'Difficulty Match': '🟡',
+      'Broad Match':      '🟠',
+      'No Match':         '❌'
+    };
+
+    const confEmoji = {
+      'High':   '✅',
+      'Medium': '⚠️',
+      'Low':    '❌'
+    };
+
+    const summaryBar = document.getElementById('summaryBar');
+    summaryBar.innerHTML = `
+      <div class="summary-item">
+        <span class="summary-label">Difficulty</span>
+        <span class="badge badge-${input.difficulty.toLowerCase()}">${input.difficulty}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Attack Category</span>
+        <span class="badge badge-info">${input.attack_category}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">OS</span>
+        <span class="badge badge-info">${input.os_pref}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Match Mode</span>
+        <span class="${modeColors[data.match_mode] || ''} summary-value">
+          ${modeEmoji[data.match_mode] || ''} ${data.match_mode}
+        </span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Confidence</span>
+        <span class="summary-value">${confEmoji[data.confidence] || ''} ${data.confidence}</span>
+      </div>
+    `;
+
+    // Show reason if fallback was used
+    if (data.reason) {
+      summaryBar.innerHTML += `
+        <div class="summary-reason">
+          ⚠️ ${data.reason}
+        </div>
+      `;
+    }
+
+    // ── RESULTS GRID ─────────────────────────────────────────────────────────
+    const resultsGrid = document.getElementById('resultsGrid');
+
+    if (!data.results || data.results.length === 0) {
+      resultsGrid.innerHTML = `
+        <div class="no-results">
+          <p>No machines found for your combination.</p>
+          <p class="text-muted">Try selecting All Platforms or different preferences.</p>
+        </div>
+      `;
+    } else {
+      data.results.forEach(machine => {
+        const diffClass = machine.difficulty.toLowerCase();
+        const warnings  = machine.warnings || [];
+
+        const warningsHtml = warnings.map(w => `
+          <div class="machine-warning">⚠️ ${w}</div>
+        `).join('');
+
+        resultsGrid.innerHTML += `
+          <div class="machine-card fade-in">
+            <div class="machine-rank font-mono">#${machine.rank}</div>
+            <div class="machine-header">
+              <h3 class="machine-name">${machine.machine_name}</h3>
+              <span class="badge badge-${diffClass}">${machine.difficulty}</span>
+            </div>
+            <div class="machine-meta">
+              <span class="meta-item">🖥️ ${machine.os}</span>
+              <span class="meta-item">🌐 ${machine.platform}</span>
+              <span class="meta-item">⏱️ ${machine.estimated_time}</span>
+            </div>
+            <div class="machine-details">
+              <div class="detail-row">
+                <span class="detail-label">Attack Category</span>
+                <span class="detail-value">${machine.attack_category}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Entry Point</span>
+                <span class="detail-value">${machine.entry_point}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">RF Predicted Difficulty</span>
+                <span class="badge badge-${machine.rf_predicted_difficulty.toLowerCase()}">
+                  ${machine.rf_predicted_difficulty}
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Similarity Score</span>
+                <span class="similarity-score">${machine.similarity_score}%</span>
+              </div>
+            </div>
+            ${warningsHtml}
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
