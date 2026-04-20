@@ -29,8 +29,154 @@
   <section class="recommend-section">
     <div class="container">
       <div class="recommend-form" id="recommendForm">
-        <!-- form fields go here -->
+
+        <!-- REQUIRED FIELDS -->
+        <div class="card">
+          <h3 class="section-title">Required Preferences</h3>
+          <p class="text-muted" style="font-size:0.85rem; margin-bottom:1.5rem;">
+            These three fields are required to generate recommendations
+          </p>
+
+          <div class="form-row">
+
+            <div class="form-group">
+              <label class="form-label">
+                Difficulty <span class="required">*</span>
+              </label>
+              <select id="difficulty">
+                <option value="">Select difficulty</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                Operating System <span class="required">*</span>
+              </label>
+              <select id="os_pref">
+                <option value="">Select OS</option>
+                <option value="Linux">Linux</option>
+                <option value="Windows">Windows</option>
+                <option value="FreeBSD">FreeBSD</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                Attack Category <span class="required">*</span>
+              </label>
+              <select id="attack_category">
+                <option value="">Select category</option>
+                <option value="Web Exploitation">Web Exploitation</option>
+                <option value="Network Exploitation">Network Exploitation</option>
+                <option value="Binary Exploitation">Binary Exploitation</option>
+                <option value="Cryptographic Exploitation">Cryptographic Exploitation</option>
+                <option value="Mixed (Web + Network)">Mixed (Web + Network)</option>
+                <option value="Credential-Based Exploitation">Credential-Based Exploitation</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- OPTIONAL FIELDS -->
+        <div class="card">
+          <h3 class="section-title">Optional Preferences</h3>
+          <p class="text-muted" style="font-size:0.85rem; margin-bottom:1.5rem;">
+            Adding more preferences improves recommendation accuracy
+          </p>
+
+          <div class="form-row">
+
+            <div class="form-group">
+              <label class="form-label">
+                Vulnerability Type <span class="optional">(optional)</span>
+              </label>
+              <select id="vuln_type">
+                <option value="">Any vulnerability</option>
+                <option value="SQL Injection">SQL Injection</option>
+                <option value="File Upload">File Upload</option>
+                <option value="Local File Inclusion (LFI)">Local File Inclusion (LFI)</option>
+                <option value="Remote Code Execution">Remote Code Execution</option>
+                <option value="Command Injection">Command Injection</option>
+                <option value="Blind SQL Injection">Blind SQL Injection</option>
+                <option value="Insecure Deserialization">Insecure Deserialization</option>
+                <option value="WordPress Exploitation">WordPress Exploitation</option>
+                <option value="Buffer Overflow">Buffer Overflow</option>
+                <option value="SMB Enumeration">SMB Enumeration</option>
+                <option value="Weak Credentials">Weak Credentials</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                Platform <span class="optional">(optional)</span>
+              </label>
+              <select id="platform">
+                <option value="VulnHub">VulnHub</option>
+              </select>
+            </div>
+
+            
+          </div>
+
+          <!-- LEARNING OBJECTIVES MULTI SELECT -->
+          <div class="form-group mt-3">
+            <label class="form-label">
+              Learning Objectives <span class="optional">(optional — select multiple)</span>
+            </label>
+            <div class="checkbox-grid" id="learningObjectives">
+              <label class="checkbox-item"><input type="checkbox" value="SQL Injection"/> SQL Injection</label>
+              <label class="checkbox-item"><input type="checkbox" value="File Upload"/> File Upload</label>
+              <label class="checkbox-item"><input type="checkbox" value="Privilege Escalation"/> Privilege Escalation</label>
+              <label class="checkbox-item"><input type="checkbox" value="Credential Extraction"/> Credential Extraction</label>
+              <label class="checkbox-item"><input type="checkbox" value="Reverse Shell"/> Reverse Shell</label>
+              <label class="checkbox-item"><input type="checkbox" value="Web Enumeration"/> Web Enumeration</label>
+              <label class="checkbox-item"><input type="checkbox" value="SSH Access"/> SSH Access</label>
+              <label class="checkbox-item"><input type="checkbox" value="Brute Force"/> Brute Force</label>
+              <label class="checkbox-item"><input type="checkbox" value="SMB Enumeration"/> SMB Enumeration</label>
+              <label class="checkbox-item"><input type="checkbox" value="Network Pivoting"/> Network Pivoting</label>
+              <label class="checkbox-item"><input type="checkbox" value="Buffer Overflow"/> Buffer Overflow</label>
+              <label class="checkbox-item"><input type="checkbox" value="Steganography"/> Steganography</label>
+              <label class="checkbox-item"><input type="checkbox" value="Hash Cracking"/> Hash Cracking</label>
+              <label class="checkbox-item"><input type="checkbox" value="Directory Bruteforce"/> Directory Bruteforce</label>
+              <label class="checkbox-item"><input type="checkbox" value="Port Scanning"/> Port Scanning</label>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- NUMBER OF RECOMMENDATIONS -->
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">
+              Number of Recommendations <span class="optional">(optional)</span>
+            </label>
+            <input type="number" id="n_recommendations" 
+                   min="1" max="20" value="5" 
+                   style="max-width: 120px;"/>
+          </div>
+        </div>
+
+
+        <!-- SUBMIT BUTTON -->
+        <div class="form-actions">
+          <button class="btn btn-primary btn-large" id="submitBtn" onclick="getRecommendations()">
+            Get Recommendations
+          </button>
+          <button class="btn btn-outline" onclick="resetForm()">
+            Reset
+          </button>
+        </div>
+
+        <!-- ERROR MESSAGE -->
+        <div id="errorMsg" class="error-msg hidden"></div>
+
       </div>
+        
+      
     </div>
   </section>
 
