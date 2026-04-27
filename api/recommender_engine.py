@@ -5,6 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity as cos_sim
 # ── CONSTANTS ─────────────────────────────────────────────────────────────────
 
 # Specific techniques — high discriminating power
+# These appear in fewer machines so they help distinguish recommendations
 SPECIFIC_OBJECTIVES = {
     'SQL Injection', 'File Upload Bypass', 'File Upload Exploitation',
     'Local File Inclusion', 'Buffer Overflow', 'Encoding/Decoding',
@@ -33,6 +34,8 @@ TIME_RANGES = {
 # ── HELPER FUNCTIONS ──────────────────────────────────────────────────────────
 
 def split_vulnerability_values(text):
+    # Splits vulnerability chain on → only
+    # Verified: → is the only chain separator in the dataset
     if not text or pd.isna(text):
         return []
     parts = str(text).split('→')
@@ -48,7 +51,21 @@ def split_semicolon_values(text):
         return []
     return [item.strip() for item in str(text).split(';') if item.strip()]
 
+def category_matches(machine_category, attack_categories):
+    # Check exact match first
+    if machine_category in attack_categories:
+        return True
+    # Check if any selected category is contained in machine category
+    # This handles 'Mixed (Web + Network)' matching when user selects 'Web Exploitation'
+    for cat in attack_categories:
+        if cat.split(' ')[0] in machine_category:
+            return True
+    return False
+
 # ── EXPANSION MAP ─────────────────────────────────────────────────────────────
+# Kept for potential future use but NOT applied to student vector
+# Removed from recommendations after evaluation showed it introduced noise
+# at this dataset size (305 machines)
 
 def build_expansion_map(df, top_n=5, min_frequency=0.2):
     expansion_map = {}
@@ -153,19 +170,21 @@ def get_confidence_label(active_features_count):
 # ── FALLBACK ──────────────────────────────────────────────────────────────────
 
 def get_machines_by_category(machine_info, attack_categories, difficulty=None):
-    # Match at least one selected attack category
-    mask = machine_info['Attack_Category'].isin(attack_categories)
+    # Uses category_matches to handle Mixed categories correctly
+    mask = machine_info['Attack_Category'].apply(
+        lambda x: category_matches(str(x), attack_categories)
+    )
     if difficulty:
         mask = mask & (machine_info['Difficulty'] == difficulty)
     return machine_info[mask].index.tolist()
 
 def get_available_machines_with_fallback(machine_info, attack_categories, difficulty, min_machines=5):
-    # Step 1: exact difficulty + at least one category
+    # Step 1: exact difficulty + category
     exact_indices = get_machines_by_category(machine_info, attack_categories, difficulty)
     if len(exact_indices) >= min_machines:
         return exact_indices, "exact"
 
-    # Step 2: relax difficulty by one level, keep category
+    # Step 2: relax difficulty by one level
     diff_order = ['Easy', 'Medium', 'Hard']
     diff_idx = diff_order.index(difficulty) if difficulty in diff_order else 1
     nearby_diffs = []
@@ -174,14 +193,14 @@ def get_available_machines_with_fallback(machine_info, attack_categories, diffic
     if diff_idx < 2:
         nearby_diffs.append(diff_order[diff_idx + 1])
 
-    relaxed_indices = []
+    relaxed_indices = list(set(exact_indices))
     for d in nearby_diffs:
         relaxed_indices.extend(get_machines_by_category(machine_info, attack_categories, d))
-    relaxed_indices = list(set(exact_indices + relaxed_indices))
+    relaxed_indices = list(set(relaxed_indices))
     if len(relaxed_indices) >= min_machines:
         return relaxed_indices, "relaxed_difficulty"
 
-    # Step 3: category only, any difficulty
+    # Step 3: category only any difficulty
     category_only = get_machines_by_category(machine_info, attack_categories)
     if len(category_only) >= min_machines:
         return category_only, "category_only"
@@ -215,6 +234,8 @@ def get_fallback_message(mode, attack_categories, difficulty):
 # ── SIMILARITY ────────────────────────────────────────────────────────────────
 
 def masked_cosine_similarity(student_vector, machine_matrix):
+    # Compare only on features student actually specified
+    # Zero features ignored so they do not dilute the score
     student_array = student_vector.values[0]
     active_mask = student_array != 0
     if active_mask.sum() == 0:
@@ -223,21 +244,18 @@ def masked_cosine_similarity(student_vector, machine_matrix):
     machines_active = machine_matrix.values[:, active_mask]
     return cos_sim(student_active, machines_active)[0]
 
-# ── OBJECTIVE MATCH SCORE ─────────────────────────────────────────────────────
+# ── MATCH SCORE FUNCTIONS ─────────────────────────────────────────────────────
 
 def compute_objective_match(machine_objectives_str, requested_objectives):
-    # Returns weighted match score and lists of matched/missing objectives
+    # Specific objectives weighted 1.0, general objectives weighted 0.5
     if not requested_objectives:
         return 1.0, [], []
-
     machine_objectives = set(split_semicolon_values(machine_objectives_str or ''))
     matched = []
     missing = []
     total_weight = 0
     matched_weight = 0
-
     for obj in requested_objectives:
-        # Specific objectives have weight 1.0, general have weight 0.5
         weight = 1.0 if obj in SPECIFIC_OBJECTIVES else 0.5
         total_weight += weight
         if obj in machine_objectives:
@@ -245,57 +263,44 @@ def compute_objective_match(machine_objectives_str, requested_objectives):
             matched_weight += weight
         else:
             missing.append(obj)
-
     score = matched_weight / total_weight if total_weight > 0 else 0
     return score, matched, missing
 
-# ── VULNERABILITY TYPE MATCH ──────────────────────────────────────────────────
-
 def compute_vuln_match(machine_vuln_str, requested_vuln):
-    # Check if requested vulnerability appears anywhere in machine's chain
+    # Check if requested vulnerability appears anywhere in machine chain
     if not requested_vuln:
         return 1.0, True
-    machine_vulns = split_vulnerability_values(machine_vuln_str or '')
-    # Also check semicolon separated
-    machine_vulns_semi = split_semicolon_values(machine_vuln_str or '')
-    all_machine_vulns = set(machine_vulns + machine_vulns_semi)
-    matched = requested_vuln in all_machine_vulns
-    return 1.0 if matched else 0.0, matched
-
-# ── TIME MATCH SCORE ──────────────────────────────────────────────────────────
+    machine_vulns = set(split_vulnerability_values(machine_vuln_str or ''))
+    matched = requested_vuln in machine_vulns
+    return (1.0 if matched else 0.0), matched
 
 def compute_time_match(machine_time_hours, requested_time_str):
     if not requested_time_str or requested_time_str not in TIME_RANGES:
         return 1.0, True
-    if pd.isna(machine_time_hours):
+    try:
+        machine_hours = float(machine_time_hours)
+    except (TypeError, ValueError):
         return 0.5, False
     low, high = TIME_RANGES[requested_time_str]
-    if low <= machine_time_hours <= high:
+    if low <= machine_hours <= high:
         return 1.0, True
-    # One range off
-    diff = min(abs(machine_time_hours - low), abs(machine_time_hours - high))
+    diff = min(abs(machine_hours - low), abs(machine_hours - high))
     if diff <= 1.5:
         return 0.5, False
     return 0.0, False
 
-# ── OS MATCH SCORE ────────────────────────────────────────────────────────────
-
 def compute_os_match(machine_os, requested_os):
     if not requested_os:
         return 1.0, True
-    matched = machine_os == requested_os
-    return 1.0 if matched else 0.0, matched
-
-# ── DIFFICULTY MATCH SCORE ────────────────────────────────────────────────────
+    matched = str(machine_os) == str(requested_os)
+    return (1.0 if matched else 0.0), matched
 
 def compute_difficulty_match(machine_difficulty, requested_difficulty):
     if machine_difficulty == requested_difficulty:
         return 1.0
     diff_order = {'Easy': 1, 'Medium': 2, 'Hard': 3}
     diff = abs(diff_order.get(machine_difficulty, 2) - diff_order.get(requested_difficulty, 2))
-    if diff == 1:
-        return 0.5
-    return 0.0
+    return 0.5 if diff == 1 else 0.0
 
 # ── STUDENT VECTOR ────────────────────────────────────────────────────────────
 
@@ -307,9 +312,12 @@ def build_student_vector(
     vuln_type=None,
     learning_objectives=None,
     estimated_time=None,
-    platform=None,
-    expansion_weight=0.2
+    platform=None
 ):
+    # Build vector using only what student explicitly selected
+    # Expansion map removed — tested and found to introduce noise
+    # at 305 machine dataset size
+
     student_vector = pd.DataFrame(
         np.zeros((1, X.shape[1])),
         columns=X.columns
@@ -320,7 +328,7 @@ def build_student_vector(
     if 'implicit_difficulty' in student_vector.columns:
         student_vector['implicit_difficulty'] = diff_map.get(difficulty, 0.5) * 2.0
 
-    # Attack categories — weight 3.0 each
+    # Attack categories — weight 3.0
     for cat in attack_categories:
         attack_col = f"attack_{cat}"
         if attack_col in student_vector.columns:
@@ -351,29 +359,6 @@ def build_student_vector(
         if 'Platform_ID' in student_vector.columns:
             student_vector['Platform_ID'] = plat_map.get(platform, 0.0)
 
-    # Expansion features — weight 0.2 (background context only)
-    if vuln_type:
-        for key, prefix in [
-            (f'vuln_skills_{vuln_type}', 'skill__'),
-            (f'vuln_objs_{vuln_type}', 'obj__')
-        ]:
-            if key in expansion_map:
-                for item in expansion_map[key]:
-                    col = f"{prefix}{item}"
-                    if col in student_vector.columns and student_vector[col].values[0] == 0:
-                        student_vector[col] = expansion_weight
-
-    for cat in attack_categories:
-        for key, prefix in [
-            (f'cat_skills_{cat}', 'skill__'),
-            (f'cat_objs_{cat}', 'obj__')
-        ]:
-            if key in expansion_map:
-                for item in expansion_map[key]:
-                    col = f"{prefix}{item}"
-                    if col in student_vector.columns and student_vector[col].values[0] == 0:
-                        student_vector[col] = expansion_weight
-
     return student_vector
 
 # ── MAIN RECOMMEND FUNCTION ───────────────────────────────────────────────────
@@ -389,7 +374,6 @@ def recommend(
     platform=None,
     n_recommendations=5
 ):
-    # Ensure attack_categories is a list
     if isinstance(attack_categories, str):
         attack_categories = [attack_categories]
 
@@ -398,7 +382,7 @@ def recommend(
     rf_best         = models['rf_best']
     feature_weights = models['feature_weights']
 
-    # Build student vector
+    # Build student vector from explicit inputs only
     student_vector = build_student_vector(
         X, expansion_map,
         difficulty, attack_categories, os_pref,
@@ -432,77 +416,72 @@ def recommend(
         student_vector_weighted, X_available_weighted
     )
 
-    # Score and build results
     results = []
     for local_idx, global_idx in enumerate(available_indices):
-        machine    = machine_info.iloc[global_idx]
-        cosine     = float(cosine_scores[local_idx])
-        rf_pred    = rf_best.predict(X.iloc[global_idx:global_idx+1])[0]
-        rf_label   = {1: 'Easy', 2: 'Medium', 3: 'Hard'}[rf_pred]
+        machine  = machine_info.iloc[global_idx]
+        cosine   = float(cosine_scores[local_idx])
+        rf_pred  = rf_best.predict(X.iloc[global_idx:global_idx+1])[0]
+        rf_label = {1: 'Easy', 2: 'Medium', 3: 'Hard'}[int(rf_pred)]
 
-        # Compute individual match scores
+        # Compute all match scores
         obj_score, matched_objs, missing_objs = compute_objective_match(
             machine.get('Learning_Objectives', ''),
             learning_objectives or []
         )
-
         vuln_score, vuln_matched = compute_vuln_match(
-            machine.get('Vulnerability_Type', ''),
-            vuln_type
+            machine.get('Vulnerability_Type', ''), vuln_type
         )
-
         time_score, time_matched = compute_time_match(
-            machine.get('Estimated_Time_Hours', np.nan),
-            estimated_time
+            machine.get('Estimated_Time_Hours', None), estimated_time
         )
-
         os_score, os_matched = compute_os_match(
-            machine.get('OS', ''),
-            os_pref
+            machine.get('OS', ''), os_pref
         )
-
         diff_score = compute_difficulty_match(
-            machine.get('Difficulty', ''),
-            difficulty
+            str(machine.get('Difficulty', '')), difficulty
         )
 
-        # Final score formula
+        # Small RF bonus when RF predicted difficulty agrees with student request
+        rf_bonus = 0.05 if rf_label == difficulty else 0.0
+
+        # Final score
         if estimated_time:
             final_score = (
                 0.50 * obj_score +
                 0.15 * vuln_score +
                 0.15 * time_score +
                 0.10 * os_score +
-                0.10 * cosine
+                0.10 * cosine +
+                rf_bonus
             )
         else:
             final_score = (
                 0.50 * obj_score +
                 0.15 * vuln_score +
                 0.10 * os_score +
-                0.25 * cosine
+                0.25 * cosine +
+                rf_bonus
             )
 
         # Hard rule — 0 objectives matched → push to bottom
         if learning_objectives and len(matched_objs) == 0:
             final_score = final_score * 0.1
 
-        # Determine tier
+        # Determine tier based on learning objectives
         if learning_objectives:
             if len(matched_objs) == len(learning_objectives) and \
-               machine.get('Difficulty') == difficulty and \
-               machine.get('Attack_Category') in attack_categories:
+               str(machine.get('Difficulty')) == difficulty and \
+               category_matches(str(machine.get('Attack_Category')), attack_categories):
                 tier = "Perfect Match"
             elif len(matched_objs) > 0 and \
-                 machine.get('Difficulty') == difficulty and \
-                 machine.get('Attack_Category') in attack_categories:
+                 str(machine.get('Difficulty')) == difficulty and \
+                 category_matches(str(machine.get('Attack_Category')), attack_categories):
                 tier = "Partial Match"
             else:
                 tier = "Fallback"
         else:
-            # No objectives selected — tier based on difficulty + category
-            if machine.get('Difficulty') == difficulty and \
-               machine.get('Attack_Category') in attack_categories:
+            if str(machine.get('Difficulty')) == difficulty and \
+               category_matches(str(machine.get('Attack_Category')), attack_categories):
                 tier = "Perfect Match"
             else:
                 tier = "Partial Match"
@@ -511,23 +490,20 @@ def recommend(
         matched_features = []
         missing_features = []
 
-        # Difficulty
-        if machine.get('Difficulty') == difficulty:
+        if str(machine.get('Difficulty')) == difficulty:
             matched_features.append(f"Difficulty: {difficulty}")
         else:
             missing_features.append(
                 f"You requested '{difficulty}' but this machine is '{machine.get('Difficulty')}'"
             )
 
-        # Attack category
-        if machine.get('Attack_Category') in attack_categories:
+        if category_matches(str(machine.get('Attack_Category')), attack_categories):
             matched_features.append(f"Attack Category: {machine.get('Attack_Category')}")
         else:
             missing_features.append(
                 f"You requested '{', '.join(attack_categories)}' but this machine is '{machine.get('Attack_Category')}'"
             )
 
-        # OS
         if os_matched:
             matched_features.append(f"OS: {os_pref}")
         else:
@@ -535,7 +511,6 @@ def recommend(
                 f"You requested '{os_pref}' but this machine runs '{machine.get('OS')}'"
             )
 
-        # Learning objectives
         for obj in matched_objs:
             matched_features.append(f"Learning Objective: {obj}")
         for obj in missing_objs:
@@ -543,7 +518,6 @@ def recommend(
                 f"You requested '{obj}' but this machine does not have it"
             )
 
-        # Vulnerability type
         if vuln_type:
             if vuln_matched:
                 matched_features.append(f"Vulnerability Type: {vuln_type}")
@@ -552,7 +526,6 @@ def recommend(
                     f"You requested '{vuln_type}' but this machine does not have it"
                 )
 
-        # Estimated time
         if estimated_time:
             if time_matched:
                 matched_features.append(f"Estimated Time: {estimated_time}")
@@ -561,51 +534,42 @@ def recommend(
                     f"You requested '{estimated_time}' but this machine takes '{machine.get('Estimated_Time')}'"
                 )
 
-        # Overall relevance score
-        total_inputs = 2  # difficulty + category always count
-        matched_inputs = 0
-        if machine.get('Difficulty') == difficulty:
-            matched_inputs += 1
-        if machine.get('Attack_Category') in attack_categories:
-            matched_inputs += 1
-        if os_pref and os_matched:
-            matched_inputs += 1
-            total_inputs += 1
-        elif os_pref:
-            total_inputs += 1
-        if learning_objectives:
-            total_inputs += len(learning_objectives)
-            matched_inputs += len(matched_objs)
-        if vuln_type:
-            total_inputs += 1
-            if vuln_matched:
-                matched_inputs += 1
+        # Weighted relevance score — consistent with scoring formula
         if estimated_time:
-            total_inputs += 1
-            if time_matched:
-                matched_inputs += 1
-
-        relevance_score = round((matched_inputs / total_inputs) * 100, 1)
+            relevance_score = round((
+                0.50 * obj_score +
+                0.15 * vuln_score +
+                0.15 * time_score +
+                0.10 * os_score +
+                0.10 * diff_score
+            ) * 100, 1)
+        else:
+            relevance_score = round((
+                0.50 * obj_score +
+                0.15 * vuln_score +
+                0.10 * os_score +
+                0.25 * diff_score
+            ) * 100, 1)
 
         results.append({
             'rank':                    0,
-            'machine_name':            machine['Machine_Name'],
-            'platform':                machine['Platform'],
-            'os':                      machine['OS'],
-            'difficulty':              machine['Difficulty'],
+            'machine_name':            str(machine['Machine_Name']),
+            'platform':                str(machine['Platform']),
+            'os':                      str(machine['OS']),
+            'difficulty':              str(machine['Difficulty']),
             'rf_predicted_difficulty': rf_label,
-            'attack_category':         machine['Attack_Category'],
-            'entry_point':             machine.get('Entry_Point', ''),
-            'estimated_time':          machine.get('Estimated_Time', ''),
-            'estimated_time_hours':    machine.get('Estimated_Time_Hours', ''),
-            'attack_path_length':      machine.get('Attack_Path_Length', ''),
-            'skills_required':         machine.get('Skills_Required', ''),
-            'learning_objectives':     machine.get('Learning_Objectives', ''),
-            'vulnerability_type':      machine.get('Vulnerability_Type', ''),
-            'kill_chain_stages':       machine.get('Kill_Chain_Stages', ''),
-            'similarity_score':        round(cosine * 100, 2),
-            'final_score':             round(final_score * 100, 2),
-            'relevance_score':         relevance_score,
+            'attack_category':         str(machine['Attack_Category']),
+            'entry_point':             str(machine.get('Entry_Point', '')),
+            'estimated_time':          str(machine.get('Estimated_Time', '')),
+            'estimated_time_hours':    float(machine.get('Estimated_Time_Hours', 0) or 0),
+            'attack_path_length':      int(machine.get('Attack_Path_Length', 0) or 0),
+            'skills_required':         str(machine.get('Skills_Required', '')),
+            'learning_objectives':     str(machine.get('Learning_Objectives', '')),
+            'vulnerability_type':      str(machine.get('Vulnerability_Type', '')),
+            'kill_chain_stages':       str(machine.get('Kill_Chain_Stages', '')),
+            'similarity_score':        round(float(cosine) * 100, 2),
+            'final_score':             round(float(final_score) * 100, 2),
+            'relevance_score':         float(relevance_score),
             'tier':                    tier,
             'matched_features':        matched_features,
             'missing_features':        missing_features,
@@ -619,12 +583,10 @@ def recommend(
         -x['final_score']
     ))
 
-    # Assign ranks
     for i, r in enumerate(results[:n_recommendations]):
         r['rank'] = i + 1
 
-    # Confidence label
-    active_count = (student_vector.values[0] != 0).sum()
+    active_count = int((student_vector.values[0] != 0).sum())
     confidence_label, confidence_msg = get_confidence_label(active_count)
 
     return (
