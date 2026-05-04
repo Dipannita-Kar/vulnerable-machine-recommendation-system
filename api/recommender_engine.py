@@ -160,12 +160,10 @@ def build_expansion_map(df, top_n=5, min_frequency=0.2):
 # ── CONFIDENCE ────────────────────────────────────────────────────────────────
 
 def get_confidence_label(active_features_count):
-    if active_features_count >= 8:
+    if active_features_count >= 6:
         return "High", None
-    elif active_features_count >= 5:
-        return "Medium", "Add optional fields for better recommendations."
     else:
-        return "Low", "Add more preferences for more accurate recommendations."
+        return "Medium", "Add learning objectives for more precise recommendations."
 
 # ── FALLBACK ──────────────────────────────────────────────────────────────────
 
@@ -486,7 +484,9 @@ def recommend(
             else:
                 tier = "Partial Match"
 
-        # Build matched and missing features
+       # Build matched and missing features
+        # Each missing feature tagged with its type in square brackets
+        # So frontend can display correct feature type label
         matched_features = []
         missing_features = []
 
@@ -494,36 +494,41 @@ def recommend(
             matched_features.append(f"Difficulty: {difficulty}")
         else:
             missing_features.append(
-                f"You requested '{difficulty}' but this machine is '{machine.get('Difficulty')}'"
+                f"[Difficulty] You requested '{difficulty}' but this machine is '{machine.get('Difficulty')}'"
             )
 
         if category_matches(str(machine.get('Attack_Category')), attack_categories):
             matched_features.append(f"Attack Category: {machine.get('Attack_Category')}")
         else:
             missing_features.append(
-                f"You requested '{', '.join(attack_categories)}' but this machine is '{machine.get('Attack_Category')}'"
+                f"[Attack Category] You requested '{', '.join(attack_categories)}' but this machine is '{machine.get('Attack_Category')}'"
             )
 
         if os_matched:
             matched_features.append(f"OS: {os_pref}")
         else:
             missing_features.append(
-                f"You requested '{os_pref}' but this machine runs '{machine.get('OS')}'"
+                f"[OS] You requested '{os_pref}' but this machine runs '{machine.get('OS')}'"
             )
 
         for obj in matched_objs:
             matched_features.append(f"Learning Objective: {obj}")
+        
+        machine_objs_list = split_semicolon_values(machine.get('Learning_Objectives', ''))
+        machine_objs_str = ', '.join(machine_objs_list[:5]) if machine_objs_list else 'None'
         for obj in missing_objs:
             missing_features.append(
-                f"You requested '{obj}' but this machine does not have it"
+                f"[Learning Objective] You requested '{obj}' but this machine does not have it. This machine has: {machine_objs_str}"
             )
 
         if vuln_type:
             if vuln_matched:
                 matched_features.append(f"Vulnerability Type: {vuln_type}")
             else:
+                machine_vuln_primary = split_vulnerability_values(machine.get('Vulnerability_Type', ''))
+                machine_vuln_str = machine_vuln_primary[0] if machine_vuln_primary else 'Unknown'
                 missing_features.append(
-                    f"You requested '{vuln_type}' but this machine does not have it"
+                    f"[Vulnerability Type] You requested '{vuln_type}' but this machine starts with '{machine_vuln_str}'"
                 )
 
         if estimated_time:
@@ -531,24 +536,27 @@ def recommend(
                 matched_features.append(f"Estimated Time: {estimated_time}")
             else:
                 missing_features.append(
-                    f"You requested '{estimated_time}' but this machine takes '{machine.get('Estimated_Time')}'"
+                    f"[Estimated Time] You requested '{estimated_time}' but this machine takes '{machine.get('Estimated_Time')}'"
                 )
 
         # Weighted relevance score — consistent with scoring formula
+        # Cosine similarity added as tiebreaker for machines with same feature match
         if estimated_time:
             relevance_score = round((
-                0.50 * obj_score +
+                0.45 * obj_score +
                 0.15 * vuln_score +
                 0.15 * time_score +
                 0.10 * os_score +
-                0.10 * diff_score
+                0.10 * diff_score +
+                0.05 * cosine
             ) * 100, 1)
         else:
             relevance_score = round((
-                0.50 * obj_score +
+                0.45 * obj_score +
                 0.15 * vuln_score +
                 0.10 * os_score +
-                0.25 * diff_score
+                0.20 * diff_score +
+                0.10 * cosine
             ) * 100, 1)
 
         results.append({
@@ -576,12 +584,25 @@ def recommend(
             'objective_match':         f"{len(matched_objs)}/{len(learning_objectives)}" if learning_objectives else "N/A"
         })
 
+    
     # Sort by tier first then final score
     tier_order = {'Perfect Match': 0, 'Partial Match': 1, 'Fallback': 2}
     results = sorted(results, key=lambda x: (
         tier_order.get(x['tier'], 3),
         -x['final_score']
     ))
+
+    # Deduplicate machines with identical feature profiles
+    # Prevents showing 4 machines with same matched/missing features
+    # Ensures diverse recommendations across different objective combinations
+    seen_profiles = {}
+    deduplicated = []
+    for r in results:
+        profile_key = tuple(sorted(r['matched_features'])) + tuple(sorted(r['missing_features']))
+        if profile_key not in seen_profiles:
+            seen_profiles[profile_key] = True
+            deduplicated.append(r)
+    results = deduplicated
 
     for i, r in enumerate(results[:n_recommendations]):
         r['rank'] = i + 1

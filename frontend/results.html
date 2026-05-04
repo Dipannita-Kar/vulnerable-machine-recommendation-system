@@ -76,15 +76,10 @@
 
     prefHtml += `<span class="pref-tag pref-required">Difficulty: ${input.difficulty}</span>`;
     prefHtml += `<span class="pref-tag pref-required">OS: ${input.os_pref}</span>`;
-
-    input.attack_categories.forEach(cat => {
-        prefHtml += `<span class="pref-tag pref-required">Category: ${cat}</span>`;
-    });
+    prefHtml += `<span class="pref-tag pref-required">Category: ${input.attack_categories.join(', ')}</span>`;
 
     if (input.learning_objectives && input.learning_objectives.length > 0) {
-        input.learning_objectives.forEach(obj => {
-            prefHtml += `<span class="pref-tag pref-optional">Objective: ${obj}</span>`;
-        });
+        prefHtml += `<span class="pref-tag pref-optional">Objectives: ${input.learning_objectives.join(', ')}</span>`;
     }
 
     if (input.vuln_type) {
@@ -115,15 +110,11 @@
     const matchBar = document.getElementById('matchBar');
     let matchHtml = `
         <div class="match-item">
-            <span class="match-label">Match Mode</span>
-            <span class="match-value" style="color:${modeColors[data.match_mode] || '#e2e8f0'}">
-                ${data.match_mode}
+            <span class="match-label">Search Mode</span>
+            <span class="match-value" style="color:${modeColors[data.match_mode] || '#1e293b'}">
+                ${data.match_mode === 'Exact Match' ? 'Standard Search' : data.match_mode}
             </span>
-        </div>
-        <div class="match-item">
-            <span class="match-label">Confidence</span>
-            <span class="match-value">${data.confidence}</span>
-        </div>
+        
         <div class="match-item">
             <span class="match-label">Results Found</span>
             <span class="match-value">${data.results.length}</span>
@@ -171,13 +162,39 @@
                 </div>
             `).join('');
 
+          
             // Missing features html
-            const missingHtml = machine.missing_features.map(f => `
-                <div class="feature-item feature-missing">
-                    <span class="feature-icon">❌</span>
-                    <span>${f}</span>
+            const missingHtml = machine.missing_features.length > 0 ? `
+                <div class="missing-section">
+                    <div class="missing-title">Not found — features requested by you:</div>
+                    ${machine.missing_features.map(f => {
+                        // Extract just the feature name from the message
+                        
+                        const typeMatch = f.match(/^\[([^\]]+)\]/);
+                        const featureType = typeMatch ? typeMatch[1] : 'Feature';
+
+                        // Extract feature name from single quotes e.g. 'SQL Injection'
+                        const match = f.match(/'([^']+)'/);
+                        const featureName = match ? match[1] : f;
+                        
+                        // Check if message contains extra info about what machine has
+                        const extraInfoMatch = f.match(/(?:This machine (?:has|starts with)|this machine takes)[: ] *'?([^']+)'?$/i);
+                        const extraInfo = extraInfoMatch ? extraInfoMatch[1] : null;
+
+                        return `
+                            <div class="feature-item feature-missing">
+                                <span class="feature-icon">❌</span>
+                                <div>
+                                    <span><strong>${featureType}:</strong> ${featureName} — not found in this machine</span>
+                                    ${extraInfo ? `<div style="font-size:0.78rem; color:#64748b; margin-top:0.2rem;">↳ ${extraInfo}</div>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
-            `).join('');
+            ` : '';
+
+            
 
             // Skills required
             const skills = machine.skills_required
@@ -222,7 +239,7 @@
                         <span class="quick-item">🌐 ${machine.platform}</span>
                         <span class="quick-item">⏱️ ${machine.estimated_time}</span>
                         <span class="quick-item">🎯 ${machine.attack_category}</span>
-                        <span class="quick-item">📊 Objective Match: ${machine.objective_match}</span>
+                        <span class="quick-item">📊 Learning Objective Match: ${machine.objective_match}</span>
                     </div>
 
                     <!-- MATCH SUMMARY -->
