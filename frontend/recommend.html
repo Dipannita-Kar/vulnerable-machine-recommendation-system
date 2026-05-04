@@ -21,51 +21,57 @@
   <section class="page-header">
     <div class="container">
       <h1>Find Your Machine</h1>
-      <p class="text-muted">Fill in your preferences and let CyberPath recommend the best machines for you</p>
+      <p class="text-muted">Fill in your preferences and CyberPath will recommend the best matching machines</p>
     </div>
   </section>
 
-  <!-- FORM SECTION -->
+  <!-- MAIN CONTENT -->
   <section class="recommend-section">
     <div class="container">
-      <div class="recommend-form" id="recommendForm">
+      <div class="recommend-layout">
 
-        <!-- REQUIRED FIELDS -->
-        <div class="card">
-          <h3 class="section-title">Required Preferences</h3>
-          <p class="text-muted" style="font-size:0.85rem; margin-bottom:1.5rem;">
-            These three fields are required to generate recommendations
-          </p>
+        <!-- FORM -->
+        <div class="recommend-form" id="recommendForm">
 
-          <div class="form-row">
+          <!-- REQUIRED FIELDS -->
+          <div class="card">
+            <h3 class="section-title">Required Preferences</h3>
+            <p class="text-muted" style="font-size:0.85rem; margin-bottom:1.5rem;">
+              All three fields below are required
+            </p>
 
-            <div class="form-group">
-              <label class="form-label">
-                Difficulty <span class="required">*</span>
-              </label>
-              <select id="difficulty">
-                <option value="">Select difficulty</option>
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-              </select>
+            <div class="form-row">
+
+              <div class="form-group">
+                <label class="form-label">
+                  Difficulty <span class="required">*</span>
+                </label>
+                <select id="difficulty">
+                  <option value="">Select difficulty</option>
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  Operating System <span class="required">*</span>
+                </label>
+                <select id="os_pref">
+                  <option value="">Select OS</option>
+                  <option value="Linux">Linux</option>
+                  <option value="Windows">Windows</option>
+                  <option value="FreeBSD">FreeBSD</option>
+                </select>
+              </div>
+
             </div>
 
-            <div class="form-group">
-              <label class="form-label">
-                Operating System <span class="required">*</span>
-              </label>
-              <select id="os_pref">
-                <option value="">Select OS</option>
-                <option value="Linux">Linux</option>
-                <option value="Windows">Windows</option>
-                <option value="FreeBSD">FreeBSD</option>
-              </select>
-            </div>
-
-            <div class="form-group">
+            <div class="form-group mt-3">
               <label class="form-label">
                 Attack Category <span class="required">*</span>
+                <span class="selection-counter" id="attackCounter" data-max="2">0/2 selected</span>
               </label>
               <div class="checkbox-grid" id="attack_category">
                 <label class="checkbox-item"><input type="checkbox" value="Web Exploitation"/> Web Exploitation</label>
@@ -76,105 +82,148 @@
                 <label class="checkbox-item"><input type="checkbox" value="Credential-Based Exploitation"/> Credential-Based Exploitation</label>
               </div>
             </div>
-
           </div>
-        </div>
 
-        <!-- OPTIONAL FIELDS -->
-        <div class="card">
-          <h3 class="section-title">Optional Preferences</h3>
-          <p class="text-muted" style="font-size:0.85rem; margin-bottom:1.5rem;">
-            Adding more preferences improves recommendation accuracy
-          </p>
+          <!-- OPTIONAL FIELDS -->
+          <div class="card">
+            <h3 class="section-title">Optional Preferences</h3>
+            <p class="text-muted" style="font-size:0.85rem; margin-bottom:1.5rem;">
+              Adding more preferences improves recommendation accuracy
+            </p>
 
-          <div class="form-row">
+            <div class="form-row">
 
-            <div class="form-group">
+              <div class="form-group">
+                <label class="form-label">
+                  Vulnerability Type <span class="optional">(optional)</span>
+                </label>
+                <select id="vuln_type">
+                  <option value="">Any vulnerability</option>
+                  <option value="SQL Injection">SQL Injection</option>
+                  <option value="Information Disclosure">Information Disclosure</option>
+                  <option value="Local File Inclusion">Local File Inclusion</option>
+                  <option value="Web Enumeration">Web Enumeration</option>
+                  <option value="Weak Credentials">Weak Credentials</option>
+                  <option value="WordPress Exploitation">WordPress Exploitation</option>
+                  <option value="SMB Enumeration">SMB Enumeration</option>
+                  <option value="Default Credentials">Default Credentials</option>
+                  <option value="Command Injection">Command Injection</option>
+                  <option value="Source Code Analysis">Source Code Analysis</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  Estimated Time <span class="optional">(optional)</span>
+                </label>
+                <select id="estimated_time">
+                  <option value="">Any duration</option>
+                  <option value="Less than 1 hour">Less than 1 hour</option>
+                  <option value="1-2 hours">1-2 hours</option>
+                  <option value="2-3 hours">2-3 hours</option>
+                  <option value="3-4 hours">3-4 hours</option>
+                  <option value="4+ hours">4+ hours</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  Platform <span class="optional">(optional)</span>
+                </label>
+                <select id="platform">
+                  <option value="">All Platforms</option>
+                  <option value="VulnHub">VulnHub</option>
+                  <option value="HackTheBox">HackTheBox</option>
+                </select>
+              </div>
+
+            </div>
+
+            <!-- LEARNING OBJECTIVES -->
+            <div class="form-group mt-3">
               <label class="form-label">
-                Vulnerability Type <span class="optional">(optional)</span>
+                Learning Objectives <span class="optional">(optional)</span>
+                <span class="selection-counter" id="objectivesCounter" data-max="3">0/3 selected</span>
               </label>
-              <div class="checkbox-grid" id="vuln_type">
+
+              <p style="font-size:0.8rem; color:#00d4ff; margin-bottom:0.75rem;">
+                Specific Techniques — higher matching weight
+              </p>
+              <div class="checkbox-grid" id="learningObjectives">
                 <label class="checkbox-item"><input type="checkbox" value="SQL Injection"/> SQL Injection</label>
-                <label class="checkbox-item"><input type="checkbox" value="File Upload"/> File Upload</label>
-                <label class="checkbox-item"><input type="checkbox" value="Local File Inclusion (LFI)"/> Local File Inclusion (LFI)</label>
-                <label class="checkbox-item"><input type="checkbox" value="Remote Code Execution"/> Remote Code Execution</label>
-                <label class="checkbox-item"><input type="checkbox" value="Command Injection"/> Command Injection</label>
-                <label class="checkbox-item"><input type="checkbox" value="Blind SQL Injection"/> Blind SQL Injection</label>
-                <label class="checkbox-item"><input type="checkbox" value="Insecure Deserialization"/> Insecure Deserialization</label>
-                <label class="checkbox-item"><input type="checkbox" value="WordPress Exploitation"/> WordPress Exploitation</label>
+                <label class="checkbox-item"><input type="checkbox" value="File Upload Bypass"/> File Upload Bypass</label>
+                <label class="checkbox-item"><input type="checkbox" value="File Upload Exploitation"/> File Upload Exploitation</label>
+                <label class="checkbox-item"><input type="checkbox" value="Local File Inclusion"/> Local File Inclusion</label>
                 <label class="checkbox-item"><input type="checkbox" value="Buffer Overflow"/> Buffer Overflow</label>
+                <label class="checkbox-item"><input type="checkbox" value="Encoding/Decoding"/> Encoding/Decoding</label>
+                <label class="checkbox-item"><input type="checkbox" value="Steganography Extraction"/> Steganography Extraction</label>
+                <label class="checkbox-item"><input type="checkbox" value="WordPress Exploitation"/> WordPress Exploitation</label>
                 <label class="checkbox-item"><input type="checkbox" value="SMB Enumeration"/> SMB Enumeration</label>
-                <label class="checkbox-item"><input type="checkbox" value="Weak Credentials"/> Weak Credentials</label>
+                <label class="checkbox-item"><input type="checkbox" value="SUID Exploitation"/> SUID Exploitation</label>
+                <label class="checkbox-item"><input type="checkbox" value="Network Pivoting"/> Network Pivoting</label>
+                <label class="checkbox-item"><input type="checkbox" value="Hash Cracking"/> Hash Cracking</label>
+                <label class="checkbox-item"><input type="checkbox" value="Webshell Execution"/> Webshell Execution</label>
+                <label class="checkbox-item"><input type="checkbox" value="FTP Enumeration"/> FTP Enumeration</label>
+                <label class="checkbox-item"><input type="checkbox" value="Default Credentials"/> Default Credentials</label>
+                <label class="checkbox-item"><input type="checkbox" value="Source Code Analysis"/> Source Code Analysis</label>
+                <label class="checkbox-item"><input type="checkbox" value="Database Enumeration"/> Database Enumeration</label>
+                <label class="checkbox-item"><input type="checkbox" value="Command Execution"/> Command Execution</label>
+              </div>
+
+              <p style="font-size:0.8rem; color:#94a3b8; margin-top:1rem; margin-bottom:0.75rem;">
+                General Learning Goals — broader objectives
+              </p>
+              <div class="checkbox-grid" id="learningObjectivesGeneral">
+                <label class="checkbox-item"><input type="checkbox" value="Privilege Escalation"/> Privilege Escalation</label>
+                <label class="checkbox-item"><input type="checkbox" value="Web Enumeration"/> Web Enumeration</label>
+                <label class="checkbox-item"><input type="checkbox" value="Credential Extraction"/> Credential Extraction</label>
+                <label class="checkbox-item"><input type="checkbox" value="Reverse Shell"/> Reverse Shell</label>
+                <label class="checkbox-item"><input type="checkbox" value="SSH Access"/> SSH Access</label>
+                <label class="checkbox-item"><input type="checkbox" value="Remote Code Execution"/> Remote Code Execution</label>
+                <label class="checkbox-item"><input type="checkbox" value="Authentication Bypass"/> Authentication Bypass</label>
+                <label class="checkbox-item"><input type="checkbox" value="Sudo Exploitation"/> Sudo Exploitation</label>
               </div>
             </div>
+          </div>
 
+          <!-- NUMBER OF RECOMMENDATIONS -->
+          <div class="card">
             <div class="form-group">
               <label class="form-label">
-                Platform <span class="optional">(optional)</span>
+                Number of Recommendations <span class="optional">(optional)</span>
               </label>
-              <select id="platform">
-                <option value="VulnHub">VulnHub</option>
-              </select>
-            </div>
-
-            
-          </div>
-
-          <!-- LEARNING OBJECTIVES MULTI SELECT -->
-          <div class="form-group mt-3">
-            <label class="form-label">
-              Learning Objectives <span class="optional">(optional — select multiple)</span>
-            </label>
-            <div class="checkbox-grid" id="learningObjectives">
-              <label class="checkbox-item"><input type="checkbox" value="SQL Injection"/> SQL Injection</label>
-              <label class="checkbox-item"><input type="checkbox" value="File Upload"/> File Upload</label>
-              <label class="checkbox-item"><input type="checkbox" value="Privilege Escalation"/> Privilege Escalation</label>
-              <label class="checkbox-item"><input type="checkbox" value="Credential Extraction"/> Credential Extraction</label>
-              <label class="checkbox-item"><input type="checkbox" value="Reverse Shell"/> Reverse Shell</label>
-              <label class="checkbox-item"><input type="checkbox" value="Web Enumeration"/> Web Enumeration</label>
-              <label class="checkbox-item"><input type="checkbox" value="SSH Access"/> SSH Access</label>
-              <label class="checkbox-item"><input type="checkbox" value="Brute Force"/> Brute Force</label>
-              <label class="checkbox-item"><input type="checkbox" value="SMB Enumeration"/> SMB Enumeration</label>
-              <label class="checkbox-item"><input type="checkbox" value="Network Pivoting"/> Network Pivoting</label>
-              <label class="checkbox-item"><input type="checkbox" value="Buffer Overflow"/> Buffer Overflow</label>
-              <label class="checkbox-item"><input type="checkbox" value="Steganography"/> Steganography</label>
-              <label class="checkbox-item"><input type="checkbox" value="Hash Cracking"/> Hash Cracking</label>
-              <label class="checkbox-item"><input type="checkbox" value="Directory Bruteforce"/> Directory Bruteforce</label>
-              <label class="checkbox-item"><input type="checkbox" value="Port Scanning"/> Port Scanning</label>
+              <input type="number" id="n_recommendations"
+                     min="1" max="20" value="5"
+                     style="max-width: 120px;"/>
             </div>
           </div>
+
+          <!-- SUBMIT -->
+          <div class="form-actions">
+            <button class="btn btn-primary btn-large" id="submitBtn" onclick="getRecommendations()">
+              Get Recommendations
+            </button>
+            <button class="btn btn-outline" onclick="resetForm()">
+              Reset
+            </button>
+          </div>
+
+          <!-- ERROR -->
+          <div id="errorMsg" class="error-msg hidden"></div>
+
         </div>
 
-
-        <!-- NUMBER OF RECOMMENDATIONS -->
-        <div class="card">
-          <div class="form-group">
-            <label class="form-label">
-              Number of Recommendations <span class="optional">(optional)</span>
-            </label>
-            <input type="number" id="n_recommendations" 
-                   min="1" max="20" value="5" 
-                   style="max-width: 120px;"/>
+        <!-- SIDEBAR -->
+        <div class="recommend-sidebar">
+          <div class="sidebar-card" id="selectionSummary">
+            <h3 class="sidebar-title">Your Selections</h3>
+            <p class="text-muted" style="font-size:0.82rem;">
+              Your selections will appear here as you fill the form.
+            </p>
           </div>
         </div>
-
-
-        <!-- SUBMIT BUTTON -->
-        <div class="form-actions">
-          <button class="btn btn-primary btn-large" id="submitBtn" onclick="getRecommendations()">
-            Get Recommendations
-          </button>
-          <button class="btn btn-outline" onclick="resetForm()">
-            Reset
-          </button>
-        </div>
-
-        <!-- ERROR MESSAGE -->
-        <div id="errorMsg" class="error-msg hidden"></div>
 
       </div>
-        
-      
     </div>
   </section>
 
