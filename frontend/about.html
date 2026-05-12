@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — CyberPath</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="index.html" class="nav-logo">Cyber<span>Path</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recommend.html">Recommend</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+    </ul>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="container">
+      <h1>About CyberPath</h1>
+      <p class="text-muted">Understanding the recommendation system and how difficulty is determined</p>
+    </div>
+  </section>
+
+  <!-- ABOUT SECTION -->
+  <section class="about-page-section">
+    <div class="container">
+      <div class="about-content">
+
+        <!-- WHAT IS CYBERPATH -->
+        <div class="about-block">
+          <h2>What is CyberPath?</h2>
+          <p>
+            CyberPath is an AI-powered vulnerable machine recommendation system designed 
+            for cybersecurity students and practitioners. It helps users find the most 
+            suitable vulnerable machines to practice their penetration testing and ethical 
+            hacking skills based on their current skill level, preferred attack techniques 
+            and learning goals.
+          </p>
+          <p>
+            Instead of randomly picking a machine to practice on, CyberPath analyses your 
+            preferences and recommends machines that best match what you want to learn — 
+            saving time and ensuring a more structured learning experience.
+          </p>
+        </div>
+
+        <!-- DATA SOURCE -->
+        <div class="about-block">
+          <h2>Machine Dataset</h2>
+          <p>
+            All vulnerable machines currently available in CyberPath are sourced from 
+            <strong>VulnHub</strong> — a platform that provides freely available vulnerable 
+            virtual machines for cybersecurity practice. The current dataset contains 
+            <strong>305 machines</strong> covering a wide range of attack categories, 
+            difficulty levels and learning objectives.
+          </p>
+          <p>
+            Each machine in the dataset has been carefully analysed and labelled with:
+          </p>
+          <div class="about-tags">
+            <span class="about-tag">Attack Category</span>
+            <span class="about-tag">Difficulty Level</span>
+            <span class="about-tag">Learning Objectives</span>
+            <span class="about-tag">Required Skills</span>
+            <span class="about-tag">Vulnerability Chain</span>
+            <span class="about-tag">Estimated Time</span>
+            <span class="about-tag">Entry Point</span>
+            <span class="about-tag">Attack Path Length</span>
+          </div>
+        </div>
+
+        <!-- DIFFICULTY -->
+        <div class="about-block">
+          <h2>How Difficulty is Determined</h2>
+          <p>
+            Difficulty classification in CyberPath is handled by a trained 
+            <strong>Random Forest machine learning model</strong> that achieves 
+            <strong>90.16% accuracy</strong> on predicting machine difficulty.
+          </p>
+          <p>
+            The model considers multiple factors to determine difficulty including 
+            the number of attack steps required, the complexity of techniques involved, 
+            the estimated time to complete and the types of vulnerabilities present.
+          </p>
+          <div class="difficulty-cards">
+            <div class="difficulty-card easy-card">
+              <span class="badge badge-easy">Easy</span>
+              <p>Straightforward attack paths with common techniques. Suitable for beginners learning the basics of penetration testing.</p>
+            </div>
+            <div class="difficulty-card medium-card">
+              <span class="badge badge-medium">Medium</span>
+              <p>Multiple attack steps requiring intermediate knowledge. Suitable for students with some experience in CTF challenges.</p>
+            </div>
+            <div class="difficulty-card hard-card">
+              <span class="badge badge-hard">Hard</span>
+              <p>Complex attack chains involving advanced techniques. Suitable for experienced practitioners looking for a challenge.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIFFICULTY IS RELATIVE -->
+        <div class="about-block about-block-highlight">
+          <h2>⚠️ Difficulty is Relative</h2>
+          <p>
+            It is important to understand that difficulty is <strong>not absolute</strong> — 
+            it is relative to each individual's experience and background.
+          </p>
+          <p>
+            A machine labelled as <strong>Easy</strong> may feel challenging to a complete 
+            beginner but straightforward to someone with prior CTF experience. Similarly, 
+            a <strong>Hard</strong> machine may be manageable for someone who specialises 
+            in that particular attack category.
+          </p>
+          <p>
+            CyberPath's difficulty labels are based on the technical complexity of the 
+            machine's attack path and the number of steps required — not on subjective 
+            human experience. We recommend using the difficulty label as a <strong>guide</strong>, 
+            not a strict rule. If a recommended machine feels too easy or too hard, 
+            adjust your difficulty preference and search again.
+          </p>
+        </div>
+
+        <!-- CTA -->
+        <div class="about-cta">
+          <h2>Ready to find your next machine?</h2>
+          <p class="text-muted">Enter your preferences and let CyberPath recommend the best machines for your learning goals.</p>
+          <a href="recommend.html" class="btn btn-primary btn-large" style="margin-top:1rem;">
+            Get Recommendations
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <span class="nav-logo">Cyber<span>Path</span></span>
+        <p class="text-muted">AI-Powered Vulnerable Machine Recommender</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

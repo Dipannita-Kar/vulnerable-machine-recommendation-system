@@ -14,6 +14,7 @@
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="recommend.html">Recommend</a></li>
+      <li><a href="about.html">About</a></li>
     </ul>
   </nav>
 
@@ -97,7 +98,7 @@
     prefHtml += '</div>';
     prefSummary.innerHTML = prefHtml;
 
-    // ── MATCH BAR ─────────────────────────────────────────────────────────────
+    // ── MATCH BAR 
 
     const modeColors = {
         'Exact Match':        '#10b981',
@@ -129,9 +130,25 @@
         `;
     }
 
+    // Warning when selected vulnerability does not match selected category
+    if (input.vuln_type && data.results.length > 0) {
+        const allMissingVuln = data.results.every(m =>
+            m.missing_features.some(f => f.includes('Vulnerability Type'))
+        );
+        if (allMissingVuln) {
+            matchHtml += `
+                <div class="match-reason">
+                    ⚠️ Note: '${input.vuln_type}' was not found in any recommended machine. 
+                    This vulnerability may not be common in '${input.attack_categories.join(', ')}' 
+                    machines at '${input.difficulty}' difficulty.
+                </div>
+            `;
+        }
+    }
+
     matchBar.innerHTML = matchHtml;
 
-    // ── RESULTS GRID ──────────────────────────────────────────────────────────
+    // ── RESULTS GRID ─
 
     const resultsGrid = document.getElementById('resultsGrid');
 

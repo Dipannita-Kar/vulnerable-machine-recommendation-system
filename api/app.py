@@ -1,9 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from model_loader import load_models, load_dataset
 from recommender_engine import build_expansion_map, recommend
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend', static_url_path='')
 CORS(app)
 
 # Load everything once when API starts
@@ -16,8 +17,12 @@ print("CyberPath API ready")
 # ── ROUTES ────────────────────────────────────────────────────────────────────
 
 @app.route('/')
-def home():
-    return jsonify({'status': 'CyberPath API is running', 'version': '2.0'})
+def index():
+    return send_from_directory('../frontend', 'index.html')
+
+@app.route('/<path:path>')
+def static_files(path):
+    return send_from_directory('../frontend', path)
 
 @app.route('/recommend', methods=['POST'])
 def get_recommendations():
@@ -28,7 +33,7 @@ def get_recommendations():
 
     # Required fields
     difficulty         = data.get('difficulty')
-    attack_categories  = data.get('attack_categories')  # now a list
+    attack_categories  = data.get('attack_categories')
     os_pref            = data.get('os_pref')
 
     if not all([difficulty, attack_categories, os_pref]):
@@ -82,7 +87,7 @@ def get_recommendations():
 def get_options():
     return jsonify({
         'difficulty': ['Easy', 'Medium', 'Hard'],
-        'os_pref':    ['Linux', 'Windows', 'FreeBSD'],
+        'os_pref':    ['Linux', 'Windows'],
         'attack_category': [
             'Web Exploitation',
             'Network Exploitation',
