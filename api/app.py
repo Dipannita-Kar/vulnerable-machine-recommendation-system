@@ -135,5 +135,43 @@ def model_stats():
         }
     })
 
+# v2 ai recommender endpoint
+from recommender_ai import recommend as recommend_ai
+
+@app.route('/recommend-ai', methods=['POST'])
+def recommend_ai_endpoint():
+    try:
+        data = request.get_json()
+        
+        difficulty = data.get('difficulty')
+        attack_categories = data.get('attack_categories', [])
+        os_pref = data.get('os_pref')
+        learning_objectives = data.get('learning_objectives', [])
+        estimated_time = data.get('estimated_time')
+        skill_level = data.get('skill_level')
+        n = int(data.get('n_recommendations', 5))
+        
+        # required fields check
+        if not difficulty or not attack_categories or not os_pref:
+            return jsonify({'error': 'difficulty, attack_categories, and os_pref are required'}), 400
+        
+        result = recommend_ai(
+            difficulty=difficulty,
+            attack_categories=attack_categories,
+            os_pref=os_pref,
+            learning_objectives=learning_objectives,
+            estimated_time=estimated_time,
+            skill_level=skill_level,
+            n=n
+        )
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

@@ -23,3 +23,8 @@ env/
 # OS files
 Thumbs.db
 .DS_Store
+
+# v2 large files - regenerate by running notebooks/ai_recommender.ipynb
+saved_models/ai_recommender/training_data.csv
+saved_models/ai_recommender/training_data_sample.csv
+saved_models/ai_recommender/random_forest_ranker.pkl
