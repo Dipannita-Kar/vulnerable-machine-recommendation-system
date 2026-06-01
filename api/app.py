@@ -7,14 +7,14 @@ import os
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 CORS(app)
 
-# Load everything once when API starts
+# Load everything 
 print("Starting CyberPath API...")
 models        = load_models()
 df            = load_dataset()
 expansion_map = build_expansion_map(df)
 print("CyberPath API ready")
 
-# ── ROUTES ────────────────────────────────────────────────────────────────────
+# ── ROUTES ─────
 
 @app.route('/')
 def index():
@@ -135,6 +135,78 @@ def model_stats():
         }
     })
 
+@app.route('/predict-difficulty', methods=['POST'])
+def predict_difficulty():
+    try:
+        data = request.get_json()
+        machine_name = data.get('machine_name', '').strip()
+
+        if not machine_name:
+            return jsonify({'error': 'Machine name required'}), 400
+
+        # Find machine in dataset
+        machine_info = models['machine_info']
+        mask = machine_info['Machine_Name'].str.lower() == machine_name.lower()
+
+        if not mask.any():
+            # Try partial match
+            mask = machine_info['Machine_Name'].str.lower().str.contains(
+                machine_name.lower(), na=False
+            )
+
+        if not mask.any():
+            return jsonify({'error': f'Machine "{machine_name}" not found in dataset'}), 404
+
+        # Use first match
+        machine_idx = machine_info[mask].index[0]
+        machine = machine_info.iloc[machine_idx]
+
+        # Get features and predict
+        X = models['X']
+        rf = models['rf_best']
+
+        features = X.iloc[machine_idx:machine_idx+1]
+        predicted_num = rf.predict(features)[0]
+        probabilities = rf.predict_proba(features)[0]
+
+        diff_map = {1: 'Easy', 2: 'Medium', 3: 'Hard'}
+        predicted_label = diff_map.get(int(predicted_num), 'Unknown')
+
+        # Get class order from classifier
+        classes = rf.classes_
+        class_labels = [diff_map.get(int(c), str(c)) for c in classes]
+        confidence = {label: round(float(prob) * 100, 1)
+                     for label, prob in zip(class_labels, probabilities)}
+
+        return jsonify({
+            'machine_name': str(machine['Machine_Name']),
+            'predicted_difficulty': predicted_label,
+            'actual_difficulty': str(machine['Difficulty']),
+            'confidence': confidence,
+            'platform': str(machine['Platform']),
+            'os': str(machine['OS']),
+            'attack_category': str(machine['Attack_Category']),
+            'estimated_time': str(machine['Estimated_Time']),
+            'attack_path_length': int(machine['Attack_Path_Length']),
+            'learning_objectives': str(machine['Learning_Objectives']),
+            'skills_required': str(machine['Skills_Required']),
+            'vulnerability_type': str(machine['Vulnerability_Type']),
+            'kill_chain_stages': str(machine['Kill_Chain_Stages']),
+            'entry_point': str(machine['Entry_Point']),
+            'matches_actual': predicted_label == str(machine['Difficulty'])
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/get-machine-names', methods=['GET'])
+def get_machine_names():
+    machine_info = models['machine_info']
+    names = sorted(machine_info['Machine_Name'].tolist())
+    return jsonify({'machines': names})
+
+
 # v2 ai recommender endpoint
 from recommender_ai import recommend as recommend_ai
 
@@ -142,7 +214,7 @@ from recommender_ai import recommend as recommend_ai
 def recommend_ai_endpoint():
     try:
         data = request.get_json()
-        
+
         difficulty = data.get('difficulty')
         attack_categories = data.get('attack_categories', [])
         os_pref = data.get('os_pref')
@@ -150,11 +222,11 @@ def recommend_ai_endpoint():
         estimated_time = data.get('estimated_time')
         skill_level = data.get('skill_level')
         n = int(data.get('n_recommendations', 5))
-        
+
         # required fields check
         if not difficulty or not attack_categories or not os_pref:
             return jsonify({'error': 'difficulty, attack_categories, and os_pref are required'}), 400
-        
+
         result = recommend_ai(
             difficulty=difficulty,
             attack_categories=attack_categories,
@@ -164,13 +236,11 @@ def recommend_ai_endpoint():
             skill_level=skill_level,
             n=n
         )
-        
+
         return jsonify(result)
-    
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
 
 
 if __name__ == '__main__':

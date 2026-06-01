@@ -465,6 +465,9 @@ def recommend(
         if learning_objectives and len(matched_objs) == 0:
             final_score = final_score * 0.1
 
+        # Cap at 1.0 to prevent score exceeding 100%
+        final_score = min(final_score, 1.0)
+
         # Determine tier based on learning objectives
         if learning_objectives:
             if len(matched_objs) == len(learning_objectives) and \

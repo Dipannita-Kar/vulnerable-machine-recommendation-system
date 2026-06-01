@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Difficulty Predictor — CyberPath</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="index.html" class="nav-logo">Cyber<span>Path</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recommend.html">Recommend</a></li>
+      <li><a href="recommend_ai.html">AI Recommend</a></li>
+      <li><a href="predict.html" class="active">Difficulty Predictor</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header">
+    <div class="container">
+      <h1>Machine Difficulty Predictor</h1>
+      <p class="text-muted">Uses a trained Random Forest classifier to predict the difficulty level of any VulnHub machine</p>
+    </div>
+  </section>
+
+  <section class="results-section">
+    <div class="container" style="max-width:700px; margin:0 auto;">
+
+      <!-- INFO NOTE -->
+      <div style="
+        background:#eff6ff;
+        border:1px solid #bfdbfe;
+        border-left:4px solid #2563eb;
+        border-radius:8px;
+        padding:12px 16px;
+        margin-bottom:1.5rem;
+        font-size:0.9rem;
+        color:#1e3a5f;
+        line-height:1.6;
+      ">
+        <strong>Note:</strong> Difficulty in cybersecurity practice is subjective and may vary depending on a student's prior experience and skill level. CyberPath uses a trained Random Forest classifier to predict difficulty based on objective machine characteristics such as attack path length, estimated completion time, kill chain complexity, and the techniques involved. The prediction reflects the structural complexity of the machine rather than any individual learner's experience.
+      </div>
+
+      <!-- SEARCH CARD -->
+      <div class="card" style="padding:2rem; margin-bottom:2rem;">
+        <h2 style="margin-bottom:1rem; font-size:1.2rem;">Search for a Machine</h2>
+
+        <div style="position:relative; margin-bottom:1rem;">
+          <input
+            type="text"
+            id="machineInput"
+            placeholder="Type a machine name e.g. Kioptrix Level 1..."
+            style="width:100%; padding:0.75rem 1rem; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; box-sizing:border-box;"
+            autocomplete="off"
+          />
+          <div id="suggestions" style="
+            position:absolute; top:100%; left:0; right:0;
+            background:white; border:1px solid #cbd5e1;
+            border-top:none; border-radius:0 0 8px 8px;
+            max-height:200px; overflow-y:auto;
+            z-index:100; display:none;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+          "></div>
+        </div>
+
+        <button id="predictBtn" onclick="predict()" style="
+          width:100%; padding:0.85rem;
+          background:#1e293b; color:white;
+          border:none; border-radius:8px;
+          font-size:1rem; font-weight:600;
+          cursor:pointer;
+        ">
+          Predict Difficulty
+        </button>
+
+        <p id="errorMsg" style="color:#dc2626; margin-top:0.5rem; display:none;"></p>
+      </div>
+
+      <!-- RESULT CARD -->
+      <div id="resultCard" style="display:none;"></div>
+
+    </div>
+  </section>
+
+  <footer class="footer footer-light">
+    <div class="container">
+      <div class="footer-content">
+        <span class="nav-logo">Cyber<span>Path</span></span>
+        <p style="color:#475569; font-size:0.85rem;">AI-Powered Vulnerable Machine Recommender</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const API = 'http://127.0.0.1:5000';
+    let allMachines = [];
+
+    // Load machine names for autocomplete
+    fetch(`${API}/get-machine-names`)
+      .then(r => r.json())
+      .then(d => { allMachines = d.machines; })
+      .catch(() => {});
+
+    // Autocomplete
+    const input = document.getElementById('machineInput');
+    const suggestions = document.getElementById('suggestions');
+
+    input.addEventListener('input', () => {
+      const val = input.value.toLowerCase().trim();
+      suggestions.innerHTML = '';
+      if (val.length < 1) { suggestions.style.display = 'none'; return; }
+
+      const matches = allMachines.filter(m => m.toLowerCase().includes(val)).slice(0, 8);
+      if (matches.length === 0) { suggestions.style.display = 'none'; return; }
+
+      matches.forEach(m => {
+        const div = document.createElement('div');
+        div.textContent = m;
+        div.style.cssText = 'padding:10px 16px; cursor:pointer; border-bottom:1px solid #f1f5f9; font-size:0.95rem;';
+        div.onmouseenter = () => div.style.background = '#f8fafc';
+        div.onmouseleave = () => div.style.background = 'white';
+        div.onclick = () => {
+          input.value = m;
+          suggestions.style.display = 'none';
+        };
+        suggestions.appendChild(div);
+      });
+      suggestions.style.display = 'block';
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#machineInput') && !e.target.closest('#suggestions')) {
+        suggestions.style.display = 'none';
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') predict();
+    });
+
+    // Difficulty colours
+    const diffColors = {
+      'Easy':   { bg:'#f0fdf4', border:'#86efac', badge:'#16a34a' },
+      'Medium': { bg:'#fffbeb', border:'#fcd34d', badge:'#d97706' },
+      'Hard':   { bg:'#fef2f2', border:'#fca5a5', badge:'#dc2626' }
+    };
+
+    async function predict() {
+      const name = document.getElementById('machineInput').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+      const resultCard = document.getElementById('resultCard');
+
+      errorMsg.style.display = 'none';
+      resultCard.style.display = 'none';
+
+      if (!name) {
+        errorMsg.textContent = 'Please enter a machine name.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('predictBtn');
+      btn.textContent = 'Predicting...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API}/predict-difficulty`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ machine_name: name })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          errorMsg.textContent = data.error || 'Machine not found. Try a different name.';
+          errorMsg.style.display = 'block';
+          btn.textContent = 'Predict Difficulty';
+          btn.disabled = false;
+          return;
+        }
+
+        const dc = diffColors[data.predicted_difficulty] || diffColors['Medium'];
+        const match = data.matches_actual;
+        const topConfidence = data.confidence[data.predicted_difficulty] || 0;
+
+        // VulnHub search link
+        const vulnhubQuery = encodeURIComponent(data.machine_name);
+        const vulnhubUrl = `https://www.vulnhub.com/?q=${vulnhubQuery}`;
+
+        // Find similar machines link — pre-fills recommender with this machine's difficulty and category
+        const recommenderUrl = `recommend_ai.html`;
+
+        // Build objectives tags
+        const objs = data.learning_objectives
+          ? data.learning_objectives.split(';').map(s => s.trim()).filter(Boolean) : [];
+        const objsHtml = objs.map(o =>
+          `<span style="background:#eff6ff; color:#2563eb; padding:2px 8px; border-radius:12px; font-size:0.8rem; display:inline-block; margin:2px;">${o}</span>`
+        ).join('');
+
+        resultCard.innerHTML = `
+          <div style="border:1px solid ${dc.border}; background:${dc.bg}; border-radius:12px; padding:1.5rem; margin-bottom:1rem;">
+
+            <!-- Machine name and prediction badge -->
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.5rem;">
+              <h2 style="margin:0; font-size:1.3rem; color:#1e293b;">${data.machine_name}</h2>
+              <div style="text-align:right;">
+                <span style="background:${dc.badge}; color:white; padding:4px 14px; border-radius:20px; font-weight:600; font-size:0.9rem; display:block; margin-bottom:3px;">
+                  ${data.predicted_difficulty}
+                </span>
+                <span style="font-size:0.8rem; color:#64748b;">${topConfidence}% confident</span>
+              </div>
+            </div>
+
+            <!-- Match vs actual label -->
+            <div style="background:${match ? '#f0fdf4' : '#fff3cd'}; border:1px solid ${match ? '#86efac' : '#fcd34d'}; border-radius:8px; padding:0.75rem 1rem; margin-bottom:1.2rem; font-size:0.9rem;">
+              ${match
+                ? `✅ Prediction matches the dataset label — actual difficulty is also <strong>${data.actual_difficulty}</strong>`
+                : `ℹ️ Dataset label is <strong>${data.actual_difficulty}</strong> — classifier prediction differs. This may reflect borderline difficulty cases.`
+              }
+            </div>
+
+            <!-- Machine details grid -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1rem;">
+              <div style="background:white; border-radius:8px; padding:0.75rem; border:1px solid #e2e8f0;">
+                <div style="font-size:0.75rem; color:#64748b; margin-bottom:3px;">Platform</div>
+                <div style="font-weight:500;">${data.platform}</div>
+              </div>
+              <div style="background:white; border-radius:8px; padding:0.75rem; border:1px solid #e2e8f0;">
+                <div style="font-size:0.75rem; color:#64748b; margin-bottom:3px;">Operating System</div>
+                <div style="font-weight:500;">${data.os}</div>
+              </div>
+              <div style="background:white; border-radius:8px; padding:0.75rem; border:1px solid #e2e8f0;">
+                <div style="font-size:0.75rem; color:#64748b; margin-bottom:3px;">Attack Category</div>
+                <div style="font-weight:500;">${data.attack_category}</div>
+              </div>
+              <div style="background:white; border-radius:8px; padding:0.75rem; border:1px solid #e2e8f0;">
+                <div style="font-size:0.75rem; color:#64748b; margin-bottom:3px;">Estimated Time</div>
+                <div style="font-weight:500;">${data.estimated_time}</div>
+              </div>
+              <div style="background:white; border-radius:8px; padding:0.75rem; border:1px solid #e2e8f0;">
+                <div style="font-size:0.75rem; color:#64748b; margin-bottom:3px;">Attack Path Length</div>
+                <div style="font-weight:500;">${data.attack_path_length} steps</div>
+              </div>
+              <div style="background:white; border-radius:8px; padding:0.75rem; border:1px solid #e2e8f0;">
+                <div style="font-size:0.75rem; color:#64748b; margin-bottom:3px;">Entry Point</div>
+                <div style="font-weight:500; font-size:0.9rem;">${data.entry_point}</div>
+              </div>
+            </div>
+
+            <!-- Learning objectives -->
+            ${objs.length > 0 ? `
+            <div style="background:white; border-radius:8px; padding:0.75rem; border:1px solid #e2e8f0; margin-bottom:1rem;">
+              <div style="font-size:0.75rem; color:#64748b; margin-bottom:6px;">Learning Objectives</div>
+              <div>${objsHtml}</div>
+            </div>` : ''}
+
+            <!-- Action buttons -->
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:0.5rem;">
+              <a href="${vulnhubUrl}" target="_blank" style="
+                flex:1; min-width:140px;
+                background:#1e293b; color:white;
+                padding:0.75rem 1rem;
+                border-radius:8px;
+                text-align:center;
+                text-decoration:none;
+                font-weight:600;
+                font-size:0.9rem;
+              ">
+                🔗 View on VulnHub
+              </a>
+              <a href="${recommenderUrl}" style="
+                flex:1; min-width:140px;
+                background:white; color:#1e293b;
+                padding:0.75rem 1rem;
+                border-radius:8px;
+                text-align:center;
+                text-decoration:none;
+                font-weight:600;
+                font-size:0.9rem;
+                border:1px solid #cbd5e1;
+              ">
+                🔍 Find Similar Machines
+              </a>
+            </div>
+
+          </div>
+        `;
+
+        resultCard.style.display = 'block';
+        resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      } catch (err) {
+        errorMsg.textContent = 'Could not connect to server. Make sure Flask is running.';
+        errorMsg.style.display = 'block';
+      }
+
+      btn.textContent = 'Predict Difficulty';
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>

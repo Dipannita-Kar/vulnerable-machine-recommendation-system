@@ -57,6 +57,44 @@ def get_match_label(top_score):
         return "Your combination is very rare - showing closest available"
 
 
+def get_rarity_warning(difficulty, attack_categories, machine_info_df):
+    # Check if the requested combination is rare in the dataset
+    # These counts are fixed based on the 305-machine dataset
+    RARE_CATEGORIES = {
+        'Binary Exploitation': 3,
+        'Credential-Based Exploitation': 3,
+        'Cryptographic Exploitation': 2
+    }
+
+    if isinstance(attack_categories, str):
+        attack_categories = [attack_categories]
+
+    warnings = []
+
+    # Check if any selected category is a known rare category
+    for cat in attack_categories:
+        if cat in RARE_CATEGORIES:
+            count = RARE_CATEGORIES[cat]
+            warnings.append(
+                f"'{cat}' is a rare category in the dataset with only {count} machines available. "
+                f"The closest matching machines have been provided."
+            )
+
+    # Check if difficulty + category combination is very limited (fewer than 5 machines)
+    for cat in attack_categories:
+        if cat not in RARE_CATEGORIES:
+            mask = (machine_info_df['Attack_Category'] == cat) & \
+                   (machine_info_df['Difficulty'] == difficulty)
+            count = int(mask.sum())
+            if count < 5:
+                warnings.append(
+                    f"Only {count} {difficulty} '{cat}' machine(s) exist in the dataset. "
+                    f"Showing the nearest available matches across difficulty levels."
+                )
+
+    return warnings if warnings else None
+
+
 def get_per_machine_breakdown(student_inputs, machine_row):
     # show what matches and what doesnt for each recommended machine
     matched = []
@@ -132,6 +170,7 @@ def recommend(difficulty, attack_categories, os_pref,
     
     top_score = float(scores[top_idx[0]])
     quality_label = get_match_label(top_score)
+    rarity_warning = get_rarity_warning(difficulty, attack_categories, machine_info)
     
     recommendations = []
     for idx in top_idx:
@@ -162,5 +201,6 @@ def recommend(difficulty, attack_categories, os_pref,
         'top_score': round(top_score, 3),
         'student_inputs': student_inputs,
         'recommendations': recommendations,
-        'model_used': 'XGBoost'
+        'model_used': 'XGBoost',
+        'rarity_warning': rarity_warning
     }

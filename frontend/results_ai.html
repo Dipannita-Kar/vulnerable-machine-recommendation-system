@@ -16,6 +16,7 @@
       <li><a href="recommend.html">Recommend</a></li>
       <li><a href="recommend_ai.html" class="active">AI Recommend</a></li>
       <li><a href="about.html">About</a></li>
+      <li><a href="predict.html">Difficulty Predictor</a></li>
     </ul>
   </nav>
 
@@ -36,6 +37,9 @@
 
       <!-- MATCH BAR -->
       <div class="match-bar" id="matchBar"></div>
+
+      <!-- RARITY WARNING — shown only when rare combination detected -->
+      <div id="rarityWarning"></div>
 
       <!-- LEGEND -->
       <div class="match-legend" style="display:flex; gap:1.5rem; padding:0.8rem 1rem; margin:1rem 0; background:#f8fafc; border-radius:6px; flex-wrap:wrap; font-size:0.85rem;">
@@ -141,6 +145,28 @@
             <span class="match-value">${data.recommendations.length}</span>
         </div>
     `;
+
+    // rarity warning — display if backend flagged a rare combination
+    const rarityWarningDiv = document.getElementById('rarityWarning');
+    if (data.rarity_warning && data.rarity_warning.length > 0) {
+        let warningHtml = `
+            <div style="
+                background: #fff3cd;
+                border: 1px solid #ffc107;
+                border-left: 4px solid #f59e0b;
+                border-radius: 8px;
+                padding: 12px 16px;
+                margin: 12px 0;
+                color: #856404;
+            ">
+                <div style="font-weight:600; margin-bottom:6px;">⚠️ Dataset Availability Notice</div>
+        `;
+        data.rarity_warning.forEach(w => {
+            warningHtml += `<div style="margin:4px 0; font-size:0.9rem;">• ${w}</div>`;
+        });
+        warningHtml += `</div>`;
+        rarityWarningDiv.innerHTML = warningHtml;
+    }
 
     // results grid
     const resultsGrid = document.getElementById('resultsGrid');
