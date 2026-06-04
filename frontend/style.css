@@ -1,4 +1,4 @@
-/* ── CYBERPATH GLOBAL STYLES ─────────────────────────────────────────────── */
+/*  CYBERPATH GLOBAL STYLES */
 /* Shared across all pages — index.html, recommend.html, results.html        */
 
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
@@ -318,7 +318,7 @@ select:focus, input:focus {
   background: rgba(0,212,255,0.5);
 }
 
-/* ── HERO ────────────────────────────────────────────────────────────────── */
+/* ── HERO  */
 
 .hero {
   min-height: 100vh;
@@ -410,7 +410,7 @@ select:focus, input:focus {
   background: var(--border);
 }
 
-/* ── FOOTER ──────────────────────────────────────────────────────────────── */
+/* ── FOOTER  */
 
 .footer {
   background: var(--bg-dark);
@@ -426,7 +426,7 @@ select:focus, input:focus {
   text-align: center;
 }
 
-/* ── PAGE HEADER ─────────────────────────────────────────────────────────── */
+/* ── PAGE HEADER  */
 
 .page-header {
   background: var(--bg-dark);
@@ -440,7 +440,7 @@ select:focus, input:focus {
   margin-bottom: 0.5rem;
 }
 
-/* ── RECOMMEND SECTION ───────────────────────────────────────────────────── */
+/* ── RECOMMEND SECTION  */
 
 .recommend-section {
   background: #0d1220;
@@ -457,7 +457,7 @@ select:focus, input:focus {
 }
 
 
-/* ── FORM STYLES ─────────────────────────────────────────────────────────── */
+/* ── FORM STYLES  */
 
 .section-title {
   font-size: 1.2rem;
@@ -529,7 +529,7 @@ select option {
   color: #e2e8f0;
 }
 
-/* ── SLIDER ──────────────────────────────────────────────────────────────── */
+/* ── SLIDER  */
 
 .slider {
   -webkit-appearance: none;
@@ -573,7 +573,7 @@ select option {
 }
 
 
-/* ── NUMBER INPUT ────────────────────────────────────────────────────────── */
+/* ── NUMBER INPUT */
 
 input[type="number"] {
   background: rgba(255,255,255,0.05);
@@ -594,7 +594,7 @@ input[type="number"]:focus {
   background: rgba(0,212,255,0.05);
 }
 
-/* ── CHECKBOX TICK ───────────────────────────────────────────────────────── */
+/* ── CHECKBOX TICK  */
 
 .checkbox-item input[type="checkbox"] {
   display: none;
@@ -623,7 +623,7 @@ input[type="number"]:focus {
 }
 
 
-/* ── RESULTS ─────────────────────────────────────────────────────────────── */
+/* ── RESULTS  */
 
 .results-section {
   background: #0d1220;
@@ -782,7 +782,7 @@ input[type="number"]:focus {
 }
 
 
-/* ── MACHINE CARD COLOR ──────────────────────────────────────────────────── */
+/* ── MACHINE CARD COLOR  */
 
 .machine-card {
   background: #1a2235;
@@ -793,7 +793,7 @@ input[type="number"]:focus {
   transition: var(--transition);
 }
 
-/* ── RECOMMEND LAYOUT ────────────────────────────────────────────────────────── */
+/* ── RECOMMEND LAYOUT  */
 
 .recommend-layout {
   display: grid;
@@ -889,7 +889,7 @@ input[type="number"]:focus {
 }
 
 
-/* ── RESULTS PAGE ────────────────────────────────────────────────────────────── */
+/* ── RESULTS PAGE */
 
 .results-page {
   background: #f0f4f8;
@@ -1228,7 +1228,7 @@ input[type="number"]:focus {
   border-top: 1px solid #e2e8f0;
 }
 
-/* ── MISSING SECTION ─────────────────────────────────────────────────────────── */
+/* ── MISSING SECTION  */
 
 .missing-section {
   margin-top: 0.5rem;
@@ -1243,7 +1243,7 @@ input[type="number"]:focus {
   margin-bottom: 0.4rem;
 }
 
-/* ── ABOUT PAGE ──────────────────────────────────────────────────────────────── */
+/* ── ABOUT PAGE */
 
 .about-page-section {
   background: #0d1220;
