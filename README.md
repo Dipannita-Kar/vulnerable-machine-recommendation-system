@@ -1,7 +1,7 @@
 # Vulnerable Machine Recommendation System
-
-CyberPath — AI-Powered Vulnerable Machine Recommendation System
-CyberPath is a full-stack web application that recommends intentionally vulnerable machines from VulnHub to cybersecurity students based on their learning preferences. The system uses machine learning to match students with appropriate practice machines based on difficulty, attack category, operating system, and learning objectives.
+This is my Masters project for COMP6016 at Curtin University.
+CyberPath : AI-Powered Vulnerable Machine Recommendation System
+CyberPath is a web  application that recommends intentionally vulnerable machines from VulnHub to cybersecurity students based on their learning preferences. The system uses machine learning to match students with appropriate practice machines based on difficulty, attack category, operating system, and learning objectives.
 
 Features
 
@@ -14,7 +14,7 @@ Transparency: Per-machine matched and missing feature explanations for every rec
 Project Structure
 Vuln Recommendation system/
 ├── api/
-│   ├── app.py                  # Main Flask application — all REST API endpoints
+│   ├── app.py                  # Main Flask application — all 7 endpoints
 │   ├── model_loader.py         # Loads Iteration 1 model artefacts at startup
 │   ├── model_loader_ai.py      # Loads Iteration 2 model artefacts at startup
 │   ├── recommender_engine.py   # Iteration 1 recommendation logic
@@ -93,7 +93,17 @@ FileSizeHow to Regeneratetraining_data.csv~528 MBRun notebooks/ai_recommender.ip
 To regenerate, open notebooks/ai_recommender.ipynb and run all cells from top to bottom. This takes approximately 15 minutes.
 
 API Endpoints
-EndpointMethodDescription/GETAPI status/recommendPOSTIteration 1 rule-based recommendations/optionsGETValid form dropdown values/model-statsGETClassifier accuracy and dataset statistics/recommend-aiPOSTIteration 2 XGBoost recommendations/predict-difficultyPOSTRF difficulty prediction for a named machine/get-machine-namesGETList of all 305 machine names for autocomplete
+Here's the original simpler version:
+
+| Endpoint          | Method | What it does |
+|----------         |--------|--------------|
+| `/`               | GET    | Serves the homepage |
+| `/recommend`      | POST   | Iteration 1 recommendations |
+| `/options`        | GET    | Returns valid dropdown values for the form |
+| `/model-stats`    | GET    | RF accuracy and dataset breakdown |
+| `/recommend-ai`   | POST   | Iteration 2 XGBoost recommendations |
+| `/predict-difficulty` | POST | Predicts difficulty for a named machine |
+| `/get-machine-names` | GET | Returns all 305 machine names (for autocomplete) |
 
 How to Use
 Iteration 1 — Rule-Based Recommender
@@ -138,17 +148,17 @@ All data was collected from publicly available VulnHub walkthroughs and penetrat
 
 Known Issues
 
-The frontend is designed for desktop browsers. Mobile layout is not optimised.
-The Flask development server is not suitable for production deployment.
-Large generated files (training_data.csv and random_forest_ranker.pkl) must be regenerated locally.
+-The frontend is designed for desktop browsers. Mobile layout is not optimised.
+-The Flask development server is not suitable for production deployment.
+-Large generated files (training_data.csv and random_forest_ranker.pkl) must be regenerated locally.
 
 
 Future Work
 
-Deploy to real students and collect interaction data to retrain the model on real user preferences
-Expand dataset to include TryHackMe and HackTheBox machines
-Add user accounts and recommendation history
-Generate structured multi-step learning paths
+-Deploy to real students and collect interaction data to retrain the model on real user preferences
+-Expand dataset to include TryHackMe and HackTheBox machines
+-Add user accounts and recommendation history
+--Generate structured multi-step learning paths
 Optimise frontend for mobile devices
 
 
