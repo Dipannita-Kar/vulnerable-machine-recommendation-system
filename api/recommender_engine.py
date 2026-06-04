@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity as cos_sim
 
-# ── CONSTANTS ─────────────────────────────────────────────────────────────────
+# CONSTANTS 
 
-# Specific techniques — high discriminating power
+# Specific techniques (high discriminating power)
 # These appear in fewer machines so they help distinguish recommendations
 SPECIFIC_OBJECTIVES = {
     'SQL Injection', 'File Upload Bypass', 'File Upload Exploitation',
@@ -31,7 +31,7 @@ TIME_RANGES = {
     '4+ hours':         (4, 99)
 }
 
-# ── HELPER FUNCTIONS ──────────────────────────────────────────────────────────
+# ─HELPER FUNCTIONS 
 
 def split_vulnerability_values(text):
     # Splits vulnerability chain on → only
@@ -62,7 +62,7 @@ def category_matches(machine_category, attack_categories):
             return True
     return False
 
-# ── EXPANSION MAP ─────────────────────────────────────────────────────────────
+# ─EXPANSION MAP
 # Kept for potential future use but NOT applied to student vector
 # Removed from recommendations after evaluation showed it introduced noise
 # at this dataset size (305 machines)
@@ -157,7 +157,7 @@ def build_expansion_map(df, top_n=5, min_frequency=0.2):
 
     return expansion_map
 
-# ── CONFIDENCE ────────────────────────────────────────────────────────────────
+# CONFIDENCE 
 
 def get_confidence_label(active_features_count):
     if active_features_count >= 6:
@@ -165,7 +165,7 @@ def get_confidence_label(active_features_count):
     else:
         return "Medium", "Add learning objectives for more precise recommendations."
 
-# ── FALLBACK ──────────────────────────────────────────────────────────────────
+# FALLBACK 
 
 def get_machines_by_category(machine_info, attack_categories, difficulty=None):
     # Uses category_matches to handle Mixed categories correctly
@@ -229,7 +229,7 @@ def get_fallback_message(mode, attack_categories, difficulty):
             "Dataset has very few machines matching your preferences."
         )
 
-# ── SIMILARITY ────────────────────────────────────────────────────────────────
+# SIMILARITY 
 
 def masked_cosine_similarity(student_vector, machine_matrix):
     # Compare only on features student actually specified
@@ -242,7 +242,7 @@ def masked_cosine_similarity(student_vector, machine_matrix):
     machines_active = machine_matrix.values[:, active_mask]
     return cos_sim(student_active, machines_active)[0]
 
-# ── MATCH SCORE FUNCTIONS ─────────────────────────────────────────────────────
+#  MATCH SCORE FUNCTIONS
 
 def compute_objective_match(machine_objectives_str, requested_objectives):
     # Specific objectives weighted 1.0, general objectives weighted 0.5
@@ -300,7 +300,7 @@ def compute_difficulty_match(machine_difficulty, requested_difficulty):
     diff = abs(diff_order.get(machine_difficulty, 2) - diff_order.get(requested_difficulty, 2))
     return 0.5 if diff == 1 else 0.0
 
-# ── STUDENT VECTOR ────────────────────────────────────────────────────────────
+# STUDENT VECTOR
 
 def build_student_vector(
     X, expansion_map,
@@ -359,7 +359,7 @@ def build_student_vector(
 
     return student_vector
 
-# ── MAIN RECOMMEND FUNCTION ───────────────────────────────────────────────────
+# MAIN RECOMMEND FUNCTION 
 
 def recommend(
     models, expansion_map,
@@ -406,7 +406,7 @@ def recommend(
             return [], None, "No Match", \
                 f"No '{platform}' machines found. Try 'All Platforms'.", "Low", None
 
-    # Compute cosine similarity
+    #Computing cosine similarity
     X_available = X.iloc[available_indices]
     student_vector_weighted = student_vector * feature_weights
     X_available_weighted    = X_available * feature_weights
@@ -421,7 +421,7 @@ def recommend(
         rf_pred  = rf_best.predict(X.iloc[global_idx:global_idx+1])[0]
         rf_label = {1: 'Easy', 2: 'Medium', 3: 'Hard'}[int(rf_pred)]
 
-        # Compute all match scores
+        # Computeing all match scores
         obj_score, matched_objs, missing_objs = compute_objective_match(
             machine.get('Learning_Objectives', ''),
             learning_objectives or []
@@ -542,7 +542,7 @@ def recommend(
                     f"[Estimated Time] You requested '{estimated_time}' but this machine takes '{machine.get('Estimated_Time')}'"
                 )
 
-        # Weighted relevance score — consistent with scoring formula
+        # Weighted relevance score (consistent with scoring formula)
         # Cosine similarity added as tiebreaker for machines with same feature match
         if estimated_time:
             relevance_score = round((
@@ -595,9 +595,9 @@ def recommend(
         -x['final_score']
     ))
 
-    # Deduplicate machines with identical feature profiles
+    #Deduplicate machines with identical feature profiles
     # Prevents showing 4 machines with same matched/missing features
-    # Ensures diverse recommendations across different objective combinations
+    #Ensures diverse recommendations across different objective combinations
     seen_profiles = {}
     deduplicated = []
     for r in results:

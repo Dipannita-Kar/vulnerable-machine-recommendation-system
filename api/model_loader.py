@@ -2,13 +2,6 @@ import joblib
 import os
 import pandas as pd
 
-# This file loads all saved model files once when the API starts
-# All other files import from here
-
-
-
-
-
 # Note: knn_model.pkl is not loaded here
 # The recommender uses masked cosine similarity instead
 # This performs better for sparse student vectors

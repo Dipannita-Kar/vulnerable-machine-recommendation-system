@@ -16,7 +16,7 @@ machine_features = joblib.load(os.path.join(V2_DIR, 'machine_features.pkl'))
 machine_info = joblib.load(os.path.join(V2_DIR, 'machine_info_v2.pkl'))
 obj_encoder = joblib.load(os.path.join(V2_DIR, 'obj_encoder.pkl'))
 
-# pulling out useful columns and counts
+# pulling  useful columns and counts
 feature_columns = list(machine_features.columns)
 n_machines = len(machine_info)
 

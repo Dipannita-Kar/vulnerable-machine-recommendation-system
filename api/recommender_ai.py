@@ -1,4 +1,4 @@
-# v2 ai recommender - pure ml scoring with xgboost
+# v2 ai recommender  () ml scoring with xgboost)
 # returns top-n machines for a given student profile
 
 import numpy as np

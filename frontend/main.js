@@ -1,6 +1,6 @@
 const API_URL = 'http://127.0.0.1:5000';
 
-// ── GET CHECKED VALUES ────────────────────────────────────────────────────────
+// ─GET CHECKED VALUES 
 
 function getCheckedValues(containerId) {
     const container = document.getElementById(containerId);
@@ -9,7 +9,7 @@ function getCheckedValues(containerId) {
     return Array.from(checked).map(cb => cb.value);
 }
 
-// ── MAX SELECTION — SINGLE CONTAINER ─────────────────────────────────────────
+// MAX SELECTION — SINGLE CONTAINER 
 
 function enforceMaxSelection(containerId, max, counterId) {
     const container = document.getElementById(containerId);
@@ -33,7 +33,7 @@ function enforceMaxSelection(containerId, max, counterId) {
     });
 }
 
-// ── MAX SELECTION — MULTIPLE CONTAINERS COMBINED ──────────────────────────────
+//  MAX SELECTION — MULTIPLE CONTAINERS COMBINED 
 
 function enforceMaxSelectionCombined(containerIds, max, counterId) {
     const getAllCheckboxes = () => {
@@ -67,7 +67,7 @@ function enforceMaxSelectionCombined(containerIds, max, counterId) {
     });
 }
 
-// ── SIDEBAR SUMMARY ───────────────────────────────────────────────────────────
+// SIDEBAR SUMMARY
 
 function updateSidebar() {
     const sidebar = document.getElementById('selectionSummary');
@@ -135,7 +135,7 @@ function updateSidebar() {
     sidebar.innerHTML = html;
 }
 
-// ── GET RECOMMENDATIONS ───────────────────────────────────────────────────────
+// GET RECOMMENDATIONS 
 
 async function getRecommendations() {
     const difficulty  = document.getElementById('difficulty').value;
@@ -199,7 +199,7 @@ async function getRecommendations() {
     }
 }
 
-// ── RESET FORM ────────────────────────────────────────────────────────────────
+// RESET FORM 
 
 function resetForm() {
     ['difficulty', 'os_pref', 'vuln_type', 'estimated_time'].forEach(id => {
@@ -225,7 +225,7 @@ function resetForm() {
     updateSidebar();
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
+// ── HELPERS ───
 
 function showError(msg) {
     const el = document.getElementById('errorMsg');
@@ -244,7 +244,7 @@ function setLoading(loading) {
     btn.textContent = loading ? 'Finding machines...' : 'Get Recommendations';
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// INIT
 
 document.addEventListener('DOMContentLoaded', function() {
     enforceMaxSelectionCombined(

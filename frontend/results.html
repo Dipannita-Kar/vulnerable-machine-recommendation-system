@@ -71,7 +71,7 @@
     const data  = JSON.parse(raw);
     const input = JSON.parse(inputRaw);
 
-    // ── PREFERENCE SUMMARY ────────────────────────────────────────────────────
+    // PREFERENCE SUMMARY 
 
     const prefSummary = document.getElementById('preferenceSummary');
     let prefHtml = '<div class="pref-title">You Selected:</div><div class="pref-tags">';
@@ -99,7 +99,7 @@
     prefHtml += '</div>';
     prefSummary.innerHTML = prefHtml;
 
-    // ── MATCH BAR 
+    // MATCH BAR 
 
     const modeColors = {
         'Exact Match':        '#10b981',
@@ -131,7 +131,7 @@
         `;
     }
 
-    // Warning when selected vulnerability does not match selected category
+    // Warning if when selected vulnerability does not match selected category
     if (input.vuln_type && data.results.length > 0) {
         const allMissingVuln = data.results.every(m =>
             m.missing_features.some(f => f.includes('Vulnerability Type'))
@@ -149,7 +149,7 @@
 
     matchBar.innerHTML = matchHtml;
 
-    // ── RESULTS GRID ─
+    //RESULTS GRID 
 
     const resultsGrid = document.getElementById('resultsGrid');
 
