@@ -3,7 +3,7 @@ This is my Masters project for COMP6016 at Curtin University.
 CyberPath : AI-Powered Vulnerable Machine Recommendation System
 CyberPath is a web  application that recommends intentionally vulnerable machines from VulnHub to cybersecurity students based on their learning preferences. The system uses machine learning to match students with appropriate practice machines based on difficulty, attack category, operating system, and learning objectives.
 
-Features
+### Features
 
 Iteration 1 — Rule-Based Recommender: Content-based recommendation engine using a trained Random Forest difficulty classifier, masked cosine similarity, two-tier learning objective weighting, and a four-level fallback mechanism.
 Iteration 2 (The final product)— AI Recommender: Supervised XGBoost recommendation model trained on 610,000 synthetic student-machine interaction pairs, providing relevance-scored recommendations with quality labels.
@@ -11,7 +11,7 @@ Difficulty Predictor: Standalone tool that uses the trained Random Forest classi
 Transparency: Per-machine matched and missing feature explanations for every recommendation so students understand exactly why each machine was suggested.
 
 
-Project Structure
+### Project Structure
 ```
 Vuln Recommendation system/
 ├── api/
@@ -88,7 +88,7 @@ bashcd api
 python app.py
 Open your browser and go to: http://127.0.0.1:5000
 
-## Large Files (Excluded from Repository)
+### Large Files (Excluded from Repository)
 
 The following files exceed GitHub's 100 MB limit and are excluded via .gitignore:
 
@@ -112,7 +112,7 @@ Here's the original simpler version:
 | `/predict-difficulty` | POST | Predicts difficulty for a named machine |
 | `/get-machine-names` | GET | Returns all 305 machine names (for autocomplete) |
 
-## How to Use
+### How to Use
 Iteration 1 — Rule-Based Recommender (initial approach)
 
 Go to http://127.0.0.1:5000
@@ -137,7 +137,7 @@ Type a machine name — suggestions appear automatically
 Click Predict Difficulty
 
 
-## Dataset
+### Dataset
 The dataset contains 305 VulnHub machines with 18 attributes including:
 
 Difficulty (Easy, Medium, Hard)
@@ -153,14 +153,14 @@ Vulnerability Type
 All data was collected from publicly available VulnHub walkthroughs and penetration testing write-ups.
 
 
-## KeyKnown Limitations
+### KeyKnown Limitations
 
 -The frontend is designed for desktop browsers. Mobile layout is not optimised.
 -The Flask development server is not suitable for production deployment.
 -Large generated files (training_data.csv and random_forest_ranker.pkl) must be regenerated locally.
 
 
-## Future Work
+### Future Work
 
 -Deploy to real students and collect interaction data to retrain the model on real user preferences.
 -Expand dataset to include TryHackMe and HackTheBox machines
@@ -169,7 +169,7 @@ All data was collected from publicly available VulnHub walkthroughs and penetrat
 -Optimise frontend for mobile devices
 
 
-## Technologies Used
+### Technologies Used
 ComponentTechnologyBackendPython 3.12.5, Flask 3.1.7Machine Learningscikit-learn, XGBoostData Processingpandas, NumPyModel SerialisationjoblibFrontendHTML5, CSS3, JavaScriptVersion ControlGit, GitHub
 
 Author
@@ -179,3 +179,4 @@ May 2025
 
 Data Source
 VulnHub — https://www.vulnhub.com
+Vulnhub-CTF-Writeups : https://github.com/Ignitetechnologies/Vulnhub-CTF-Writeups/blob/master/README.md
