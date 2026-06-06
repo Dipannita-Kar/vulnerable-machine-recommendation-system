@@ -168,7 +168,7 @@ def recommend(difficulty, attack_categories, os_pref,
         'skill': skill_level
     }
     
-    top_score = float(scores[top_idx[0]])
+    top_score = min(float(scores[top_idx[0]]), 1.0)
     quality_label = get_match_label(top_score)
     rarity_warning = get_rarity_warning(difficulty, attack_categories, machine_info)
     
@@ -191,7 +191,7 @@ def recommend(difficulty, attack_categories, os_pref,
             'kill_chain_stages': m['Kill_Chain_Stages'],
             'skills_required': m['Skills_Required'],
             'learning_objectives': m['Learning_Objectives'],
-            'predicted_relevance': round(float(scores[idx]), 3),
+            'predicted_relevance': round(min(float(scores[idx]), 1.0), 3),
             'matched_features': matched,
             'missing_features': missing
         })

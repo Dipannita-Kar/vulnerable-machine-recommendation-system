@@ -100,10 +100,22 @@
     const API = 'http://127.0.0.1:5000';
     let allMachines = [];
 
-    // Load machine names for autocomplete
+    // Loading machine names for autocomplete
     fetch(`${API}/get-machine-names`)
       .then(r => r.json())
-      .then(d => { allMachines = d.machines; })
+      .then(d => {
+        const excludedNames = [
+          'Bot Challeneg: Dexter',
+          'SP eric',
+          'SP ike',
+          'SP Jerome',
+          'Digitalworld.local JOY',
+          'digitalworld.local:Torment',
+          'digitalworld.local:fall',
+          'digitalworld.local:vengeance'
+        ];
+        allMachines = d.machines.filter(name => !excludedNames.includes(name));
+      })
       .catch(() => {});
 
     // Autocomplete

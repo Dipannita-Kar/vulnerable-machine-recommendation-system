@@ -6,7 +6,7 @@ CyberPath is a web  application that recommends intentionally vulnerable machine
 Features
 
 Iteration 1 — Rule-Based Recommender: Content-based recommendation engine using a trained Random Forest difficulty classifier, masked cosine similarity, two-tier learning objective weighting, and a four-level fallback mechanism.
-Iteration 2 — AI Recommender: Supervised XGBoost recommendation model trained on 610,000 synthetic student-machine interaction pairs, providing relevance-scored recommendations with quality labels.
+Iteration 2 (The final product)— AI Recommender: Supervised XGBoost recommendation model trained on 610,000 synthetic student-machine interaction pairs, providing relevance-scored recommendations with quality labels.
 Difficulty Predictor: Standalone tool that uses the trained Random Forest classifier to predict the difficulty level of any machine in the dataset with confidence percentage.
 Transparency: Per-machine matched and missing feature explanations for every recommendation so students understand exactly why each machine was suggested.
 
@@ -106,7 +106,7 @@ Here's the original simpler version:
 | `/get-machine-names` | GET | Returns all 305 machine names (for autocomplete) |
 
 How to Use
-Iteration 1 — Rule-Based Recommender
+Iteration 1 — Rule-Based Recommender (initial approach)
 
 Go to http://127.0.0.1:5000
 Click Rule-Based Recommender
@@ -114,7 +114,7 @@ Select your difficulty, OS, and attack category (required)
 Optionally add learning objectives, vulnerability type, and estimated time
 Click Get Recommendations
 
-Iteration 2 — AI Recommender
+Iteration 2 — AI Recommender (Final product) 
 
 Go to http://127.0.0.1:5000
 Click AI Recommender
