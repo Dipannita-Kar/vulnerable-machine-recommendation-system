@@ -88,9 +88,15 @@ bashcd api
 python app.py
 Open your browser and go to: http://127.0.0.1:5000
 
-Large Files (Excluded from Repository)
+## Large Files (Excluded from Repository)
+
 The following files exceed GitHub's 100 MB limit and are excluded via .gitignore:
-FileSizeHow to Regeneratetraining_data.csv~528 MBRun notebooks/ai_recommender.ipynb Cell 7 and Cell 8random_forest_ranker.pkl~70 MBRun notebooks/ai_recommender.ipynb Cell 9
+
+| File | Size | How to Regenerate |
+|------|------|-------------------|
+| training_data.csv | ~528 MB | Run notebooks/ai_recommender.ipynb cells 7 and 8 |
+| random_forest_ranker.pkl | ~70 MB | Run notebooks/ai_recommender.ipynb cell 9 |
+
 To regenerate, open notebooks/ai_recommender.ipynb and run all cells from top to bottom. This takes approximately 15 minutes.
 
 API Endpoints
@@ -156,11 +162,11 @@ Known Issues
 
 Future Work
 
--Deploy to real students and collect interaction data to retrain the model on real user preferences
+-Deploy to real students and collect interaction data to retrain the model on real user preferences.
 -Expand dataset to include TryHackMe and HackTheBox machines
 -Add user accounts and recommendation history
---Generate structured multi-step learning paths
-Optimise frontend for mobile devices
+-Generate structured multi-step learning paths
+-Optimise frontend for mobile devices
 
 
 Technologies Used
