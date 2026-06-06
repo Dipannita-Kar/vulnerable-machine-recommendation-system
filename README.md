@@ -59,12 +59,17 @@ pip
 
 
 Installation
-Step 1 — Clone the repository
-bashgit clone https://github.com/Dipannita-Kar/vulnerable-machine-recommendation-system
+**Step 1 — Clone the repository**
+``` bash 
+git clone https://github.com/Dipannita-Kar/vulnerable-machine-recommendation-system
 cd vulnerable-machine-recommendation-system
-Step 2 — Install dependencies
+```
+**Step 2 — Install dependencies**
+```bash
 bashpip install flask flask-cors pandas numpy scikit-learn xgboost joblib matplotlib
-Step 3 — Verify model artefacts
+```
+**Step 3 — Verify model artefacts**
+```bash
 Make sure the following files are present before running:
 Iteration 1 (saved_models/):
 
@@ -82,11 +87,14 @@ xgboost_ranker.pkl
 machine_features.pkl
 machine_info_v2.pkl
 obj_encoder.pkl
+```
 
-Step 4 — Run the application
+**Step 4 — Run the application**
+```bash
 bashcd api
 python app.py
 Open your browser and go to: http://127.0.0.1:5000
+```
 
 ### Large Files (Excluded from Repository)
 
