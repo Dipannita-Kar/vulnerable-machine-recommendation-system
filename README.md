@@ -112,7 +112,7 @@ Here's the original simpler version:
 | `/predict-difficulty` | POST | Predicts difficulty for a named machine |
 | `/get-machine-names` | GET | Returns all 305 machine names (for autocomplete) |
 
-How to Use
+## How to Use
 Iteration 1 — Rule-Based Recommender (initial approach)
 
 Go to http://127.0.0.1:5000
@@ -137,7 +137,7 @@ Type a machine name — suggestions appear automatically
 Click Predict Difficulty
 
 
-Dataset
+## Dataset
 The dataset contains 305 VulnHub machines with 18 attributes including:
 
 Difficulty (Easy, Medium, Hard)
@@ -153,14 +153,14 @@ Vulnerability Type
 All data was collected from publicly available VulnHub walkthroughs and penetration testing write-ups.
 
 
-Known Issues
+## KeyKnown Limitations
 
 -The frontend is designed for desktop browsers. Mobile layout is not optimised.
 -The Flask development server is not suitable for production deployment.
 -Large generated files (training_data.csv and random_forest_ranker.pkl) must be regenerated locally.
 
 
-Future Work
+## Future Work
 
 -Deploy to real students and collect interaction data to retrain the model on real user preferences.
 -Expand dataset to include TryHackMe and HackTheBox machines
@@ -169,7 +169,7 @@ Future Work
 -Optimise frontend for mobile devices
 
 
-Technologies Used
+## Technologies Used
 ComponentTechnologyBackendPython 3.12.5, Flask 3.1.7Machine Learningscikit-learn, XGBoostData Processingpandas, NumPyModel SerialisationjoblibFrontendHTML5, CSS3, JavaScriptVersion ControlGit, GitHub
 
 Author
