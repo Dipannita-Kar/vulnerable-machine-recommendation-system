@@ -12,6 +12,7 @@ Transparency: Per-machine matched and missing feature explanations for every rec
 
 
 Project Structure
+```
 Vuln Recommendation system/
 ├── api/
 │   ├── app.py                  # Main Flask application — all 7 endpoints
@@ -50,7 +51,7 @@ Vuln Recommendation system/
 │       ├── obj_encoder.pkl         # Fitted MultiLabelBinarizer
 │       └── plots/                  # Evaluation plots
 └── README.md
-
+```
 Requirements
 
 Python 3.12.5 or later
